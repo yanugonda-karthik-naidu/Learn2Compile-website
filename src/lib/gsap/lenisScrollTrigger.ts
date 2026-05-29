@@ -35,7 +35,14 @@ export function registerLenisScrollTrigger(lenis: Lenis) {
     pinType: scroller ? "transform" : "fixed",
   });
 
+  // Throttled scroll handler to prevent excessive updates
+  let lastUpdate = 0;
+  const minUpdateInterval = 16; // ~60fps throttle
+
   lenis.on("scroll", () => {
+    const now = performance.now();
+    if (now - lastUpdate < minUpdateInterval) return;
+    lastUpdate = now;
     ScrollTrigger.update();
   });
 

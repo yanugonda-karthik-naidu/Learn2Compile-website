@@ -1,15 +1,8 @@
-# TODO - Contact page cinematic rebuild
+## TODO
 
-## Plan checkpoints
-- [ ] Confirm existing Contact implementation details (done)
-- [x] Refactor `src/components/sections/contact/ContactSection.tsx` into a cinematic inquiry workflow
-- [ ] Implement cinematic Contact Hero with lightweight R3F environment + holographic UI panels
-- [ ] Replace basic form-first UX with guided inquiry panels (business/project/budget/timeline/goals)
-- [ ] Add premium CTA modules (Start Your Project, Get Custom Quote, WhatsApp Inquiry, Book Consultation)
-- [ ] Upgrade WhatsApp CTA to use guided inquiry state for prefilled message
-- [ ] Add consultation workflow storytelling panel (process/onboarding/communication/collaboration)
-- [ ] Integrate GSAP choreography using existing patterns (`gsap.context` and/or `data-animate`)
-- [ ] Ensure performance + reduced motion safety for R3F
-- [ ] Preserve submit flow to `/api/contact` and keep backend validation working
-- [ ] Run lint/build and sanity-check runtime errors
+- [x] Add cinematic premium AI entity (geometric engineering-core) as a lightweight 3D Three.js component.
+- [x] Integrate the entity into the existing workstation ecosystem (inside WorkstationDesk).
+- [x] Implement slow emotional-breathing motion (18–35s), restrained drift, and performance-safe visuals.
+- [ ] Wire CTA hover → assistant glow/behavior via DOM dataset (`data-bb-cta-hover`) in `HeroSection.tsx` (Hero CTAs currently do not set it).
+- [ ] Re-run build/lint after CTA wiring.
 

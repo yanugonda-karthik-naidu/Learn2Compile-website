@@ -13,12 +13,14 @@ import { FaqSection } from "./faq/FaqSection";
 import { ContactSection } from "./contact/ContactSection";
 import { FooterSection } from "./footer/FooterSection";
 import { CustomCursor } from "./cursor/CustomCursor";
+import { MascotProvider } from "@/components/mascot";
 
 export function StudioFullLanding() {
   return (
     <div className="relative min-h-screen bg-[#050816] text-white">
       <Navbar />
       <CustomCursor />
+      <MascotProvider />
       <HeroSection />
       <TrustSection />
       <ServicesSection />

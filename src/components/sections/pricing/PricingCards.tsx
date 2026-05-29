@@ -1,6 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { motion } from "@/lib/gsap/config";
+import { prefersReducedMotion } from "@/lib/gsap/reducedMotion";
+import { useCinematicButton } from "@/hooks/useCinematicButton";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 type Package = {
   key: string;
@@ -76,12 +85,66 @@ const packages: Package[] = [
   },
 ];
 
+function CinematicPricingCTA({
+  href,
+  pkgName,
+  accent,
+  hovered,
+}: {
+  href: string;
+  pkgName: string;
+  accent: string;
+  hovered: boolean;
+}) {
+  const { onMouseEnter, onMouseLeave, onMouseDown, onMouseUp, onMouseMove, containerRef } =
+    useCinematicButton({
+      scaleStrength: 1.03,
+      glowStrength: 0.25,
+      glowColor: `${accent}25`,
+      anticipationDelay: 0.05,
+    });
+
+  return (
+    <a
+      ref={containerRef as React.RefObject<HTMLAnchorElement>}
+      href={href}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+      onMouseMove={onMouseMove}
+      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition-all duration-300"
+      style={{
+        background: hovered ? `${accent}15` : undefined,
+        borderColor: hovered ? `${accent}40` : undefined,
+      }}
+    >
+      Start with {pkgName}
+      <svg
+        className="h-4 w-4 transition-transform group-hover:translate-x-1"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M17 8l4 4m0 0l-4 4m4-4H3"
+        />
+      </svg>
+    </a>
+  );
+}
+
 function PricingCard({ pkg, index }: { pkg: Package; index: number }) {
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   return (
     <article
+      ref={cardRef}
       className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 transition-all duration-500 hover:border-white/20 hover:bg-white/[0.07]"
       style={{
         transform: hovered ? "scale(1.02)" : "scale(1)",
@@ -189,29 +252,12 @@ function PricingCard({ pkg, index }: { pkg: Package; index: number }) {
 
         {/* CTA */}
         <div className="mt-6">
-          <a
+          <CinematicPricingCTA
             href="/custom-quote"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-white/20 hover:bg-white/10"
-            style={{
-              background: hovered ? `${pkg.accent}15` : undefined,
-              borderColor: hovered ? `${pkg.accent}40` : undefined,
-            }}
-          >
-            Start with {pkg.title}
-            <svg
-              className="h-4 w-4 transition-transform group-hover:translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              />
-            </svg>
-          </a>
+            pkgName={pkg.title}
+            accent={pkg.accent}
+            hovered={hovered}
+          />
         </div>
       </div>
     </article>
@@ -219,8 +265,63 @@ function PricingCard({ pkg, index }: { pkg: Package; index: number }) {
 }
 
 export function PricingCards() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Cinematic breathing stagger reveal
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (prefersReducedMotion()) return;
+
+    const ctx = gsap.context(() => {
+      const items = sectionRef.current?.querySelectorAll("[data-stagger-item]");
+      if (!items || items.length === 0) return;
+
+      // Breathing stagger - each card has slightly different timing
+      gsap.set(items, {
+        opacity: 0,
+        y: motion.reveal.y.normal,
+        scale: 0.97,
+        filter: "blur(3px)",
+      });
+
+      // Create timeline with breathing rhythm
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: motion.reveal.start,
+          toggleActions: "play none none none",
+        },
+      });
+
+      // Subtle anticipation pulse
+      tl.to(items, {
+        scale: 0.98,
+        duration: motion.cinematic.breathe.delay,
+        ease: "power2.in",
+        stagger: motion.section.pricing.staggerEach / 3,
+      });
+
+      // Main reveal with breathing stagger
+      tl.to(
+        items,
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          filter: "blur(0px)",
+          duration: motion.section.pricing.duration.base,
+          ease: motion.section.pricing.ease,
+          stagger: motion.section.pricing.staggerEach,
+        },
+        0.05
+      );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="pricing-cards" className="relative bg-[#050816] py-24">
+    <section ref={sectionRef} id="pricing-cards" className="relative bg-[#050816] py-24" data-section="pricing">
       <div className="mx-auto max-w-6xl px-6">
         {/* Section header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -240,7 +341,7 @@ export function PricingCards() {
         </div>
 
         {/* Pricing cards grid */}
-        <div className="mt-12 grid gap-6 lg:grid-cols-3" data-animate="stagger">
+        <div className="mt-12 grid gap-6 lg:grid-cols-3">
           {packages.map((pkg, index) => (
             <PricingCard key={pkg.key} pkg={pkg} index={index} />
           ))}

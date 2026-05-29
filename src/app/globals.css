@@ -1,26 +1,192 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   Cinematic Composition Scaling - Responsive Design System
+   ============================================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Responsive breakpoints for composition control */
+  --comp-breakpoint-sm: 640px;
+  --comp-breakpoint-md: 768px;
+  --comp-breakpoint-lg: 1024px;
+  --comp-breakpoint-xl: 1280px;
+  --comp-breakpoint-2xl: 1536px;
+  --comp-breakpoint-ultrawide: 1920px;
+
+  /* Container widths - unified to max-w-7xl (80rem) */
+  --container-max: 80rem;
+  --container-max-hero: 85rem;
+
+  /* Atmospheric scaling */
+  --atmo-scale-sm: 0.5;
+  --atmo-scale-md: 0.75;
+  --atmo-scale-lg: 0.9;
+  --atmo-scale-xl: 1;
+  --atmo-scale-2xl: 1.15;
+  --atmo-scale-ultrawide: 1.25;
+
+  /* Hero breathing room */
+  --hero-padding-sm: 1.5rem;
+  --hero-padding-md: 2rem;
+  --hero-padding-lg: 3rem;
+  --hero-padding-xl: 4rem;
+
+  /* Section rhythm */
+  --section-gap-sm: 4rem;
+  --section-gap-lg: 6rem;
+  --section-gap-xl: 8rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* Ultrawide composition constraint */
+@media (min-width: 1920px) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --container-max: 90rem;
+    --atmo-scale: var(--atmo-scale-ultrawide);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Cinematic section rhythm */
+.section-rhythm {
+  padding-top: var(--section-gap-sm);
+  padding-bottom: var(--section-gap-sm);
+}
+@media (min-width: 1024px) {
+  .section-rhythm {
+    padding-top: var(--section-gap-lg);
+    padding-bottom: var(--section-gap-lg);
+  }
+}
+@media (min-width: 1280px) {
+  .section-rhythm {
+    padding-top: var(--section-gap-xl);
+    padding-bottom: var(--section-gap-xl);
+  }
+}
+
+/* Hero breathing room */
+.hero-space {
+  padding-top: var(--hero-padding-sm);
+  padding-bottom: var(--hero-padding-sm);
+}
+@media (min-width: 768px) {
+  .hero-space {
+    padding-top: var(--hero-padding-md);
+    padding-bottom: var(--hero-padding-md);
+  }
+}
+@media (min-width: 1024px) {
+  .hero-space {
+    padding-top: var(--hero-padding-lg);
+    padding-bottom: var(--hero-padding-lg);
+  }
+}
+
+/* 3D Environment responsive heights */
+.env-height {
+  height: 280px;
+}
+@media (min-width: 768px) {
+  .env-height {
+    height: 360px;
+  }
+}
+@media (min-width: 1024px) {
+  .env-height {
+    height: 460px;
+  }
+}
+
+/* Ultrawide content constraint */
+.ultrawide-constrain {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================================================
+   Performance Optimization Classes
+   ============================================================================ */
+
+/* GPU-accelerated animations - use when element will animate */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Layout containment for animated sections */
+.contain-layout {
+  contain: layout style;
+}
+
+/* Paint containment for static sections */
+.contain-paint {
+  contain: paint;
+}
+
+/* Composite containment for complex animations */
+.contain-composite {
+  contain: layout style paint;
+}
+
+/* Remove will-change after animation completes */
+.will-change-remove {
+  will-change: auto;
+}
+
+/* R3F Canvas container optimization */
+.canvas-container {
+  contain: layout style;
+  transform: translateZ(0);
+}
+
+/* Reduced motion fallback for smooth systems */
+@media (prefers-reduced-motion: reduce) {
+  .gpu-accelerated {
+    transform: none;
+    will-change: auto;
+  }
+}
+
+/* ============================================================================
+   Cinematic Atmosphere Animations
+   ============================================================================ */
+
+@keyframes ambientShift {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+@keyframes gridPulse {
+  0%, 100% {
+    opacity: 0.07;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes fogDrift {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-2px) translateX(1px);
+  }
+  50% {
+    transform: translateY(0) translateX(2px);
+  }
+  75% {
+    transform: translateY(2px) translateX(1px);
+  }
 }

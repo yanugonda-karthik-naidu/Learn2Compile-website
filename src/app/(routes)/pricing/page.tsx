@@ -8,10 +8,33 @@ import { PricingConfigurator } from "@/components/sections/pricing/PricingConfig
 import { PricingValue } from "@/components/sections/pricing/PricingValue";
 import { PricingCTA } from "@/components/sections/pricing/PricingCTA";
 
+// Force dynamic rendering to prevent SSR issues with client components
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Pricing | Premium Packages | Learn2Compile",
+  title: "Transparent Pricing Packages",
   description:
-    "Transparent pricing packages for premium web development. Choose from Starter, Growth, or Premium plans. Interactive calculator available.",
+    "Clear, honest pricing for premium web development. Choose from Starter, Growth, or Enterprise plans. Interactive calculator and custom quotes available.",
+  keywords: [
+    "web development pricing",
+    "website cost India",
+    "transparent pricing",
+    "web design packages",
+    "affordable web development",
+  ],
+  openGraph: {
+    title: "Transparent Pricing Packages | Learn2Compile",
+    description:
+      "Clear, honest pricing for premium web development. Choose from Starter, Growth, or Enterprise plans.",
+    images: [
+      {
+        url: "/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "Learn2Compile Pricing",
+      },
+    ],
+  },
 };
 
 export default function PricingPage() {

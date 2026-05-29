@@ -73,7 +73,6 @@ export function QuoteSteps() {
   >({ status: "idle" });
 
   const formRef = useRef<HTMLDivElement>(null);
-  const stepsRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -210,7 +209,7 @@ export function QuoteSteps() {
                   Consultation workflow
                 </div>
                 <div className="mt-2 text-xs leading-5 text-white/65">
-                  We don't reply with generic forms. You'll get scope clarity and
+                  We don&apos;t reply with generic forms. You&apos;ll get scope clarity and
                   a communication timeline.
                 </div>
 

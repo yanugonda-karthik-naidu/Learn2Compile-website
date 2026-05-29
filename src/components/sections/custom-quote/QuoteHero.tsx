@@ -1,133 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Environment, Float, PerspectiveCamera } from "@react-three/drei";
-import * as THREE from "three";
+import { useEffect, useRef } from "react";
+import { StudioEnvironment } from "@/components/3d/environments/StudioEnvironment";
+import { AtmosphericLayer } from "@/components/sections/cinematic/AtmosphericLayer";
 import { gsap } from "gsap";
-
-function HeroScene({ mousePos }: { mousePos: { x: number; y: number } }) {
-  const groupRef = useRef<THREE.Group | null>(null);
-  const panelRef1 = useRef<THREE.Mesh | null>(null);
-  const panelRef2 = useRef<THREE.Mesh | null>(null);
-  const panelRef3 = useRef<THREE.Mesh | null>(null);
-  const panelRef4 = useRef<THREE.Mesh | null>(null);
-
-  useEffect(() => {
-    if (!groupRef.current) return;
-    const targetRotY = mousePos.x * 0.15;
-    const targetRotX = -mousePos.y * 0.1;
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
-      targetRotY,
-      0.06
-    );
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(
-      groupRef.current.rotation.x,
-      targetRotX,
-      0.06
-    );
-  }, [mousePos]);
-
-  useEffect(() => {
-    const animatePanel = (mesh: THREE.Mesh | null, delay: number) => {
-      if (!mesh) return;
-      gsap.fromTo(
-        mesh.scale,
-        { x: 0, y: 0, z: 0 },
-        { x: 1, y: 1, z: 1, duration: 1.2, delay, ease: "power3.out" }
-      );
-    };
-    animatePanel(panelRef1.current, 0.4);
-    animatePanel(panelRef2.current, 0.6);
-    animatePanel(panelRef3.current, 0.8);
-    animatePanel(panelRef4.current, 1.0);
-  }, []);
-
-  return (
-    <group ref={groupRef}>
-      {/* Main planning dashboard */}
-      <Float speed={1.2} floatIntensity={0.3} rotationIntensity={0.15}>
-        <mesh ref={panelRef1} position={[0, 0, 0]} rotation={[0, 0, 0]}>
-          <boxGeometry args={[2.0, 1.3, 0.04]} />
-          <meshStandardMaterial
-            color="#0ea5e9"
-            metalness={0.95}
-            roughness={0.1}
-            emissive="#38BDF8"
-            emissiveIntensity={0.2}
-            transparent
-            opacity={0.85}
-          />
-        </mesh>
-      </Float>
-
-      {/* Left workflow panel */}
-      <Float speed={1.5} floatIntensity={0.4} rotationIntensity={0.2}>
-        <mesh ref={panelRef2} position={[-1.4, 0.3, 0.3]} rotation={[0, 0.35, 0]}>
-          <boxGeometry args={[0.8, 1.1, 0.03]} />
-          <meshStandardMaterial
-            color="#8B5CF6"
-            metalness={0.95}
-            roughness={0.1}
-            emissive="#8B5CF6"
-            emissiveIntensity={0.2}
-            transparent
-            opacity={0.8}
-          />
-        </mesh>
-      </Float>
-
-      {/* Right metrics panel */}
-      <Float speed={1.0} floatIntensity={0.25} rotationIntensity={0.12}>
-        <mesh ref={panelRef3} position={[1.3, 0.2, 0.2]} rotation={[0, -0.3, 0]}>
-          <boxGeometry args={[0.7, 0.9, 0.03]} />
-          <meshStandardMaterial
-            color="#06B6D4"
-            metalness={0.95}
-            roughness={0.1}
-            emissive="#06B6D4"
-            emissiveIntensity={0.2}
-            transparent
-            opacity={0.85}
-          />
-        </mesh>
-      </Float>
-
-      {/* Top indicator panel */}
-      <Float speed={0.8} floatIntensity={0.2} rotationIntensity={0.1}>
-        <mesh ref={panelRef4} position={[0.2, 1.1, 0.1]} rotation={[0, 0.1, 0]}>
-          <boxGeometry args={[0.5, 0.35, 0.03]} />
-          <meshStandardMaterial
-            color="#a78bfa"
-            metalness={0.9}
-            roughness={0.15}
-            emissive="#a78bfa"
-            emissiveIntensity={0.25}
-            transparent
-            opacity={0.9}
-          />
-        </mesh>
-      </Float>
-
-      {/* Ground plane */}
-      <mesh position={[0, -1.0, -1]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[7, 7]} />
-        <meshStandardMaterial
-          color="#0a0a1a"
-          metalness={0.8}
-          roughness={0.4}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
-    </group>
-  );
-}
+import { motion } from "@/lib/gsap/config";
+import { useMotion } from "@/hooks/useMotion";
 
 export function QuoteHero() {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [reduced, setReduced] = useState(false);
+  const { reduced } = useMotion();
   const heroRef = useRef<HTMLDivElement>(null);
   const eyebrowRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -135,57 +16,13 @@ export function QuoteHero() {
   const ctaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const mql = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-    if (!mql) return;
-    const onChange = () => setReduced(mql.matches);
-    onChange();
-    if (typeof mql.addEventListener === "function")
-      mql.addEventListener("change", onChange);
-    else mql.addListener(onChange);
-    return () => {
-      if (typeof mql.removeEventListener === "function")
-        mql.removeEventListener("change", onChange);
-      else mql.removeListener(onChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e: PointerEvent) => {
-      const nx = (e.clientX / window.innerWidth) * 2 - 1;
-      const ny = (e.clientY / window.innerHeight) * 2 - 1;
-      setMousePos({ x: nx, y: ny });
-    };
-    window.addEventListener("pointermove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("pointermove", handleMouseMove);
-  }, []);
-
-  useEffect(() => {
     if (reduced) return;
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: 0.2 });
-      tl.fromTo(
-        eyebrowRef.current,
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }
-      )
-        .fromTo(
-          titleRef.current,
-          { y: 40, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.9, ease: "power3.out" },
-          "-=0.3"
-        )
-        .fromTo(
-          subtitleRef.current,
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
-          "-=0.5"
-        )
-        .fromTo(
-          ctaRef.current,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" },
-          "-=0.4"
-        );
+      const tl = gsap.timeline({ delay: motion.hero.delay });
+      tl.fromTo(eyebrowRef.current, { y: motion.hero.badge.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.badge.duration, ease: motion.hero.badge.ease })
+        .fromTo(titleRef.current, { y: motion.hero.title.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.title.duration, ease: motion.hero.title.ease }, motion.hero.title.overlap)
+        .fromTo(subtitleRef.current, { y: motion.hero.subtitle.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.subtitle.duration, ease: motion.hero.subtitle.ease }, motion.hero.subtitle.overlap)
+        .fromTo(ctaRef.current, { y: motion.hero.cta.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.cta.duration, ease: motion.hero.cta.ease }, motion.hero.cta.overlap);
     }, heroRef);
     return () => ctx.revert();
   }, [reduced]);
@@ -196,28 +33,16 @@ export function QuoteHero() {
       className="relative min-h-screen overflow-hidden bg-[#050816]"
     >
       <div className="absolute inset-0">
-        <div
-          className="absolute inset-0 bg-[radial-gradient(800px_circle_at_30%_20%,rgba(56,189,248,0.15),transparent_50%),radial-gradient(600px_circle_at_70%_60%,rgba(139,92,246,0.12),transparent_50%)]"
-        />
+        {/* Cinematic atmospheric layer */}
+        <AtmosphericLayer variant="subtle" reducedMotion={reduced} />
         {!reduced && (
           <div className="absolute inset-0">
-            <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0.5, 5], fov: 45 }}>
-              <PerspectiveCamera makeDefault position={[0, 0.5, 5]} />
-              <ambientLight intensity={0.4} />
-              <directionalLight position={[3, 4, 3]} intensity={0.8} />
-              <pointLight
-                position={[-3, 2, 2]}
-                intensity={0.5}
-                color="#38BDF8"
-              />
-              <pointLight
-                position={[3, 2, -2]}
-                intensity={0.4}
-                color="#8B5CF6"
-              />
-              <Environment preset="night" />
-              <HeroScene mousePos={mousePos} />
-            </Canvas>
+            <StudioEnvironment
+              reduced={reduced}
+              className="!absolute !inset-0"
+              cameraPosition={[0, 0.5, 5]}
+              cameraFov={45}
+            />
           </div>
         )}
       </div>

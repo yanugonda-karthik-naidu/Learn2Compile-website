@@ -20,20 +20,22 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     // Avoid synchronous state change during the same render cycle.
     const raf = window.requestAnimationFrame(() => {
       setIsTransitioning(true);
 
-      const t = window.setTimeout(() => {
+      timeoutId = setTimeout(() => {
         setIsTransitioning(false);
       }, 220);
-
-      // Ensure timeout cleanup always happens.
-      return t;
     });
 
     return () => {
       window.cancelAnimationFrame(raf);
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+      }
     };
   }, [pathname]);
 

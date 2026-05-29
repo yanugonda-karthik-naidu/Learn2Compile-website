@@ -2,6 +2,45 @@
 
 import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
+import { useCinematicButton } from "@/hooks/useCinematicButton";
+
+function CinematicCTA({
+  href,
+  children,
+  variant = "primary",
+  className = "",
+}: {
+  href: string;
+  children: React.ReactNode;
+  variant?: "primary" | "secondary";
+  className?: string;
+}) {
+  const { onMouseEnter, onMouseLeave, onMouseDown, onMouseUp, onMouseMove, containerRef } =
+    useCinematicButton({
+      scaleStrength: variant === "primary" ? 1.03 : 1.02,
+      glowStrength: variant === "primary" ? 0.3 : 0.2,
+      glowColor:
+        variant === "primary"
+          ? "rgba(56,189,248,0.3)"
+          : "rgba(139,92,246,0.2)",
+      anticipationDelay: 0.08,
+    });
+
+  return (
+    <a
+      ref={containerRef as React.RefObject<HTMLAnchorElement>}
+      href={href}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseDown={onMouseDown}
+      onMouseUp={onMouseUp}
+      onMouseMove={onMouseMove}
+      className={className}
+    >
+      {children}
+    </a>
+  );
+}
 
 export function QuoteCTA() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -28,12 +67,12 @@ export function QuoteCTA() {
           ref={sectionRef}
           className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5"
         >
-          {/* Gradient background */}
+          {/* Gradient background - asymmetric for QuoteCTA variety */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(800px circle at 50% -20%, rgba(56,189,248,0.15), transparent 55%), radial-gradient(600px circle at 80% 80%, rgba(139,92,246,0.12), transparent 50%)",
+                "radial-gradient(800px circle at 10% 0%, rgba(56,189,248,0.15), transparent 55%), radial-gradient(600px circle at 85% 20%, rgba(139,92,246,0.12), transparent 50%)",
             }}
           />
 
@@ -68,9 +107,10 @@ export function QuoteCTA() {
 
             {/* CTA buttons */}
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
-              <a
+              <CinematicCTA
                 href="#quote-form"
-                className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#38BDF8]/30 via-[#8B5CF6]/30 to-[#06B6D4]/30 px-8 py-4 text-base font-medium text-white shadow-[0_0_40px_rgba(56,189,248,0.2)] transition-all duration-300 hover:from-[#38BDF8]/45 hover:via-[#8B5CF6]/45 hover:to-[#06B6D4]/45"
+                variant="primary"
+                className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#38BDF8]/30 via-[#8B5CF6]/30 to-[#06B6D4]/30 px-6 py-3.5 text-base font-medium text-white shadow-[0_0_40px_rgba(56,189,248,0.2)] transition-all duration-300 hover:from-[#38BDF8]/45 hover:via-[#8B5CF6]/45 hover:to-[#06B6D4]/45 active:scale-[0.98]"
               >
                 <span>Start Your Consultation</span>
                 <svg
@@ -86,14 +126,15 @@ export function QuoteCTA() {
                     d="M17 8l4 4m0 0l-4 4m4-4H3"
                   />
                 </svg>
-              </a>
+              </CinematicCTA>
 
-              <a
+              <CinematicCTA
                 href="/contact"
-                className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-8 py-4 text-base font-medium text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition-all duration-200 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(56,189,248,0.15)]"
+                variant="secondary"
+                className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-6 py-3.5 text-base font-medium text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition-all duration-200 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(56,189,248,0.15)] active:scale-[0.98]"
               >
                 Schedule a Call
-              </a>
+              </CinematicCTA>
             </div>
 
             {/* WhatsApp option */}

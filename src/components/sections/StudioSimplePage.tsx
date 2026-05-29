@@ -8,6 +8,7 @@ import { ContactSection } from "./contact/ContactSection";
 import { FaqSection } from "./faq/FaqSection";
 import { FooterSection } from "./footer/FooterSection";
 import { CustomCursor } from "./cursor/CustomCursor";
+import { MascotProvider } from "@/components/mascot";
 
 export function StudioSimplePage({
   eyebrow,
@@ -24,6 +25,7 @@ export function StudioSimplePage({
     <div className="relative min-h-screen bg-[#050816] text-white">
       <Navbar />
       <CustomCursor />
+      <MascotProvider />
 
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(900px_circle_at_10%_0%,rgba(56,189,248,0.18),transparent_55%),radial-gradient(700px_circle_at_85%_20%,rgba(139,92,246,0.14),transparent_50%)]" />

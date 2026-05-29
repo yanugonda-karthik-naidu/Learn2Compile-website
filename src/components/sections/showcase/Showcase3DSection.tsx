@@ -1,63 +1,75 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
-import { Environment, Float, PerspectiveCamera } from "@react-three/drei";
-import { useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
+import { useEffect, useRef, useState, Suspense } from "react";
+import { gsap } from "gsap";
+import dynamic from "next/dynamic";
 
-function Scene({ reduced }: { reduced: boolean }) {
-  const ref = useRef<THREE.Group | null>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+// Lazy load the 3D environment with SSR disabled
+const StudioEnvironment = dynamic(
+  () => import("@/components/3d/environments/StudioEnvironment").then((mod) => mod.StudioEnvironment),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full flex items-center justify-center bg-[#050816]/50 animate-pulse">
+        <div className="h-8 w-8 rounded-full border-2 border-[#38BDF8] border-t-transparent animate-spin" />
+      </div>
+    ),
+  }
+);
 
+function ShowcaseScene({ reduced }: { reduced: boolean }) {
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Intersection Observer for lazy loading
   useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      const nx = (e.clientX / window.innerWidth) * 2 - 1;
-      const ny = (e.clientY / window.innerHeight) * 2 - 1;
-      setMouse({ x: nx, y: ny });
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!ref.current) return;
-    const targetRotY = mouse.x * 0.35;
-    const targetRotX = -mouse.y * 0.25;
-    ref.current.rotation.y = targetRotY;
-    ref.current.rotation.x = targetRotX;
-  }, [mouse]);
-
-  const config = useMemo(() => {
-    return reduced
-      ? { dpr: [1, 1], float: 0.9 }
-      : { dpr: [1, 2], float: 1.5 };
+    if (reduced || !sceneRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(sceneRef.current, { opacity: 0 }, { opacity: 1, duration: 0.8, delay: 0.3 });
+    }, sceneRef);
+    return () => ctx.revert();
   }, [reduced]);
 
   return (
-    <Canvas dpr={config.dpr as [number, number]} camera={{ position: [0, 0.9, 4.5], fov: 40 }}>
-      <PerspectiveCamera makeDefault position={[0, 0.9, 4.5]} />
-      <ambientLight intensity={0.45} />
-      <directionalLight position={[2, 3, 2]} intensity={1.0} />
-      {!reduced && <Environment preset="studio" />}
-      <group ref={ref}>
-        <Float speed={config.float} floatIntensity={reduced ? 0.2 : 0.55} rotationIntensity={reduced ? 0.15 : 0.5}>
-          <mesh rotation={[0.2, 0.4, 0]}>
-            <torusKnotGeometry args={[0.8, 0.28, 220, 28]} />
-            <meshStandardMaterial color={"#38BDF8"} metalness={0.9} roughness={0.25} emissive={"#8B5CF6"} emissiveIntensity={0.8} />
-          </mesh>
-
-          <mesh position={[1.5, -0.3, 0]} rotation={[0, 0.5, 0]}>
-            <boxGeometry args={[0.42, 0.12, 0.22]} />
-            <meshStandardMaterial color={"#A78BFA"} metalness={0.95} roughness={0.1} emissive={"#22D3EE"} emissiveIntensity={1.0} />
-          </mesh>
-
-          <mesh position={[-1.25, 0.2, -0.1]}>
-            <sphereGeometry args={[0.26, 32, 32]} />
-            <meshStandardMaterial color={"#22D3EE"} metalness={0.95} roughness={0.15} emissive={"#22D3EE"} emissiveIntensity={1.2} />
-          </mesh>
-        </Float>
-      </group>
-    </Canvas>
+    <div ref={containerRef} className="h-full w-full">
+      <div ref={sceneRef} className="h-full w-full">
+        {isVisible && (
+          <Suspense
+            fallback={
+              <div className="h-full w-full flex items-center justify-center bg-[#050816]/50 animate-pulse">
+                <div className="h-8 w-8 rounded-full border-2 border-[#38BDF8] border-t-transparent animate-spin" />
+              </div>
+            }
+          >
+            <StudioEnvironment
+              reduced={reduced}
+              className="!h-full !w-full"
+              cameraPosition={[0, 1.8, 7]}
+              cameraFov={45}
+            />
+          </Suspense>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -97,7 +109,7 @@ export function Showcase3DSection() {
 
         <div className="mt-10 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent">
           <div className="h-[420px] md:h-[520px]">
-            <Scene reduced={reduced} />
+            <ShowcaseScene reduced={reduced} />
           </div>
 
           <div className="pointer-events-none relative -mt-20 px-5 md:px-7">

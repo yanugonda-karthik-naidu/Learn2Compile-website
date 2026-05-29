@@ -6,7 +6,8 @@ export function createResendServerClient() {
   if (!apiKey) throw new Error("Missing env var: RESEND_API_KEY");
   return {
     async send(_payload: unknown) {
-      // no-op (safe placeholder)
+      // Stub: safely ignore payload since Resend is not yet configured
+      void _payload;
       return { id: "resend_stub" };
     },
   };
