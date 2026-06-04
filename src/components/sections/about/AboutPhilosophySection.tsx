@@ -152,7 +152,7 @@ export function AboutPhilosophySection() {
   const items = useMemo(() => principles, []);
 
   return (
-    <section ref={sectionRef} className="relative bg-[#050816] py-24">
+    <section ref={sectionRef} className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_30%,rgba(56,189,248,0.08),transparent_50%)]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">

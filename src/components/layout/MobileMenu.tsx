@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
-import { gsap } from "gsap";
 import { usePathname } from "next/navigation";
+import { gsap } from "gsap";
 import { motion } from "@/lib/gsap/config";
 
 interface NavLink {
@@ -18,69 +18,177 @@ interface MobileMenuProps {
 }
 
 export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const linksRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const firstActionRef = useRef<HTMLAnchorElement | null>(null);
+
+  const items = useMemo(() => links, [links]);
+
   useEffect(() => {
-    if (!menuRef.current || !overlayRef.current || !linksRef.current) return;
-    const menu = menuRef.current;
-    const overlay = overlayRef.current;
-    const linkElements = linksRef.current.querySelectorAll(".menu-link");
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return;
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
 
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      gsap.set(menu, { display: "flex" });
-      gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: motion.transition.menuOverlay.duration, ease: motion.transition.menuOverlay.ease });
-      gsap.fromTo(menu, { x: "100%" }, { x: "0%", duration: motion.transition.menuSlide.duration, ease: motion.transition.menuSlide.ease });
-      gsap.fromTo(linkElements, { x: 50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, stagger: motion.transition.menuStagger.each, ease: motion.transition.menuStagger.ease, delay: 0.2 });
     } else {
-      gsap.to(linkElements, { x: 50, opacity: 0, duration: 0.2, stagger: 0.03, ease: "power2.in" });
-      gsap.to(menu, { x: "100%", duration: motion.transition.menuSlide.duration, ease: "power3.in", delay: 0.1 });
-      gsap.to(overlay, { opacity: 0, duration: motion.transition.menuOverlay.duration, ease: "power2.in", delay: 0.3, onComplete: () => {
-        gsap.set(menu, { display: "none" });
-        document.body.style.overflow = "";
-      }});
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const overlay = overlayRef.current;
+    const card = cardRef.current;
+    if (!overlay || !card) return;
+
+    if (isOpen) {
+      gsap.set(overlay, { display: "block" });
+      gsap.set(card, { opacity: 0, y: 16, scale: 0.98, visibility: "visible" });
+
+      gsap.to(overlay, {
+        opacity: 1,
+        duration: 0.18,
+        ease: motion.transition.menuOverlay.ease,
+      });
+
+      gsap.to(card, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.26,
+        ease: motion.transition.menuSlide.ease,
+        onComplete: () => {
+          firstActionRef.current?.focus?.();
+        },
+      });
+    } else {
+      gsap.to(card, {
+        opacity: 0,
+        y: 16,
+        scale: 0.98,
+        duration: 0.18,
+        ease: "power2.inOut",
+        onComplete: () => {
+          gsap.set(card, { visibility: "hidden" });
+          gsap.set(overlay, { display: "none" });
+        },
+      });
+
+      gsap.to(overlay, {
+        opacity: 0,
+        duration: 0.16,
+        ease: "power2.in",
+      });
     }
   }, [isOpen]);
 
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(href));
+
   return (
-    <div ref={overlayRef} className="fixed inset-0 z-40 bg-black/70 backdrop-blur-md md:hidden" style={{ display: "none" }} onClick={onClose}>
-      <div ref={menuRef} className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col justify-center bg-[#050816]/95 backdrop-blur-xl border-l border-white/10" style={{ display: "none" }}>
-        <div className="absolute right-4 top-4">
-          <button onClick={onClose} className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition-all duration-200 hover:bg-white/10 active:scale-95">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-[9999] hidden md:hidden"
+      style={{ opacity: 0 }}
+      onMouseDown={(e) => {
+        // Click outside closes
+        if (e.target === overlayRef.current) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Mobile navigation"
+    >
+      <div
+        ref={cardRef}
+        className="relative mx-auto w-[calc(100vw-32px)] max-w-[520px] rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_50px_rgba(56,189,248,0.18)] p-4 sm:p-5 visibility-hidden"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-2 pt-1">
+          <Link
+            href="/"
+            onClick={onClose}
+            className="flex items-center gap-2 rounded-2xl px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60"
+            ref={firstActionRef}
+          >
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] shadow-[0_0_20px_rgba(56,189,248,0.3)]">
+              <span className="text-sm font-bold text-white">L2C</span>
+            </div>
+            <span className="text-sm font-semibold tracking-tight text-white/95">
+              Learn2Compile
+            </span>
+          </Link>
+
+          <button
+            onClick={onClose}
+            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:bg-white/10 active:scale-95"
+            aria-label="Close menu"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        <div ref={linksRef} className="flex flex-col gap-1 px-6">
-          {links.map((link) => {
-            const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+        {/* Menu */}
+        <div className="mt-4 flex flex-col gap-2">
+          {items.map((link) => {
+            const active = isActive(link.href);
             return (
-              <Link key={link.href} href={link.href} onClick={onClose} className={`menu-link group relative px-4 py-4 text-2xl font-medium transition-all duration-200 rounded-2xl min-h-[56px] flex items-center ${isActive ? "text-white" : "text-white/70 hover:text-white"}`}>
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={onClose}
+                className={`relative flex items-center justify-center rounded-2xl px-4 py-3 text-center text-base font-medium transition active:scale-[0.99] outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${
+                  active ? "text-white" : "text-white/75 hover:text-white"
+                }`}
+              >
+                {active && (
+                  <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#38BDF8]/20 via-[#8B5CF6]/20 to-[#06B6D4]/20 border border-white/10" />
+                )}
                 <span className="relative z-10">{link.label}</span>
-                {isActive && <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#38BDF8]/20 via-[#8B5CF6]/20 to-[#06B6D4]/20 border border-white/10" />}
-                <span className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-200 group-hover:opacity-100 bg-gradient-to-r from-[#38BDF8]/10 via-[#8B5CF6]/10 to-[#06B6D4]/10" />
               </Link>
             );
           })}
 
-          <div className="mt-6 menu-link">
-            <Link href="/custom-quote" onClick={onClose} className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-[#38BDF8]/20 via-[#8B5CF6]/20 to-[#06B6D4]/20 px-6 py-4 text-base font-medium text-white shadow-[0_0_25px_rgba(56,189,248,0.15)] transition-all duration-300 hover:from-[#38BDF8]/30 hover:via-[#8B5CF6]/30 hover:to-[#06B6D4]/30 hover:shadow-[0_0_35px_rgba(56,189,248,0.25)] hover:scale-[1.02] active:scale-[0.98]">
-              Start Project
-              <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-            </Link>
-          </div>
-        </div>
+          {/* CTA */}
+          <Link
+            href="/custom-quote"
+            onClick={onClose}
+            className="mt-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#38BDF8]/20 via-[#8B5CF6]/20 to-[#06B6D4]/20 px-4 py-3 text-base font-medium text-white shadow-[0_0_25px_rgba(56,189,248,0.15)] ring-1 ring-white/10 transition hover:from-[#38BDF8]/30 hover:via-[#8B5CF6]/30 hover:to-[#06B6D4]/30 hover:shadow-[0_0_35px_rgba(56,189,248,0.25)] active:scale-[0.99]"
+          >
+            Start Your Project
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
 
-        <div className="absolute bottom-8 left-0 right-0 px-6 menu-link">
-          <div className="flex items-center justify-center gap-2 text-xs text-white/40">
-            <span>Learn2Compile Studio</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-[#38BDF8]" />
-          </div>
+          <a
+            href="https://wa.me/"
+            onClick={(e) => {
+              // keep behavior consistent with existing menu; still close
+              onClose();
+            }}
+            className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-base font-medium text-white/90 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition hover:border-[#38BDF8]/30 hover:bg-white/10 hover:text-white active:scale-[0.99]"
+          >
+            WhatsApp Inquiry
+          </a>
         </div>
       </div>
     </div>
   );
 }
+

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { StudioEnvironment } from "@/components/3d/environments/StudioEnvironment";
-import { AtmosphericLayer } from "@/components/sections/cinematic/AtmosphericLayer";
 import { gsap } from "gsap";
 import { motion } from "@/lib/gsap/config";
 import { useMotion } from "@/hooks/useMotion";
@@ -27,18 +25,8 @@ export function ServicesHeroSection() {
 
   return (
     <section ref={heroRef} className="relative min-h-screen overflow-hidden bg-[#050816]">
-      <div className="absolute inset-0">
-        {/* Cinematic atmospheric layer */}
-        <AtmosphericLayer variant="subtle" reducedMotion={reduced} />
-        <div className="absolute inset-0">
-          <StudioEnvironment
-            reduced={reduced}
-            className="!absolute !inset-0"
-            cameraPosition={[0, 0.5, 5]}
-            cameraFov={45}
-          />
-        </div>
-      </div>
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(56,189,248,0.12),transparent_50%),radial-gradient(ellipse_at_80%_70%,rgba(139,92,246,0.10),transparent_50%)]" />
+
       <div className="relative z-10 flex min-h-screen items-center">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
@@ -46,7 +34,7 @@ export function ServicesHeroSection() {
               <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
               What we build
             </div>
-            <h1 ref={titleRef} className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl opacity-0">
+            <h1 ref={titleRef} className="mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.1] tracking-tight opacity-0">
               <span className="text-white">Premium Digital Experiences</span>
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4]">Built for Modern Businesses</span>
@@ -66,14 +54,14 @@ export function ServicesHeroSection() {
           </div>
         </div>
       </div>
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+      {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
         <div className="flex flex-col items-center gap-2 text-white/40">
           <span className="text-xs uppercase tracking-[0.2em]">Scroll to explore</span>
           <div className="h-8 w-5 rounded-full border border-white/20 p-1">
             <div className="h-1.5 w-1.5 rounded-full bg-white/60 animate-bounce" />
           </div>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 }

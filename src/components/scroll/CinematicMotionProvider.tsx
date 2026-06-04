@@ -1,45 +1,35 @@
 "use client";
 
 import { useEffect } from "react";
-import type Lenis from "@studio-freight/lenis";
+
 import { initDataAttributeAnimations } from "@/lib/gsap/runner";
-import { registerLenisScrollTrigger } from "@/lib/gsap/lenisScrollTrigger";
+
 import { prefersReducedMotion } from "@/lib/gsap/reducedMotion";
 
-function getLenis(): Lenis | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as { __lenis?: Lenis };
-  return w.__lenis ?? null;
-}
+
 
 export function CinematicMotionProvider() {
   useEffect(() => {
     if (prefersReducedMotion()) return;
 
-    const lenis = getLenis();
-
-    if (lenis) {
-      registerLenisScrollTrigger(lenis);
-    }
-
-    // First pass.
+    // First pass: keep GSAP ScrollTrigger-driven reveals.
     initDataAttributeAnimations(document);
 
-    // Re-run on route-level hydration changes (cheap, no state updates).
+
+    // Prevent duplicate/extra ScrollTrigger creation.
+    // The reveal system should be initialized once and made idempotent in runner.ts.
+    // A follow-up ScrollTrigger refresh is handled inside initDataAttributeAnimations.
     const t = window.setTimeout(() => {
-      initDataAttributeAnimations(document);
-      // Best-effort refresh: if ScrollTrigger is available.
       try {
         if (typeof window !== "undefined") {
-          // Best-effort: ScrollTrigger may exist on window if already loaded.
           const st = (window as unknown as { ScrollTrigger?: { refresh?: (force?: boolean) => void } }).ScrollTrigger;
-          if (st?.refresh) st.refresh(true);
+          st?.refresh?.(true);
         }
       } catch {
-
         // no-op
       }
     }, 250);
+
 
     return () => {
       window.clearTimeout(t);

@@ -4,8 +4,9 @@ import { FooterSection } from "@/components/sections/footer/FooterSection";
 import { CustomCursor } from "@/components/sections/cursor/CustomCursor";
 import { PricingHero } from "@/components/sections/pricing/PricingHero";
 import { PricingCards } from "@/components/sections/pricing/PricingCards";
-import { PricingConfigurator } from "@/components/sections/pricing/PricingConfigurator";
+import { PricingComparison } from "@/components/sections/pricing/PricingComparison";
 import { PricingValue } from "@/components/sections/pricing/PricingValue";
+import { PricingFAQ } from "@/components/sections/pricing/PricingFAQ";
 import { PricingCTA } from "@/components/sections/pricing/PricingCTA";
 
 // Force dynamic rendering to prevent SSR issues with client components
@@ -46,8 +47,9 @@ export default function PricingPage() {
       <main>
         <PricingHero />
         <PricingCards />
-        <PricingConfigurator />
+        <PricingComparison />
         <PricingValue />
+        <PricingFAQ />
         <PricingCTA />
       </main>
 

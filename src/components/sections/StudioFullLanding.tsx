@@ -2,11 +2,10 @@
 
 import { Navbar } from "@/components/layout/Navbar";
 import { HeroSection } from "./hero/HeroSection";
-import { TrustSection } from "./trust/TrustSection";
+import { AboutMetricsSection } from "./about/AboutMetricsSection";
 import { ServicesSection } from "./services/ServicesSection";
-import { Showcase3DSection } from "./showcase/Showcase3DSection";
 import { PortfolioSection } from "./portfolio/PortfolioSection";
-import { ProcessSection } from "./process/ProcessSection";
+import { AboutWorkflowSection } from "./about/AboutWorkflowSection";
 import { PricingSection } from "./pricing/PricingSection";
 import { TestimonialsSection } from "./testimonials/TestimonialsSection";
 import { FaqSection } from "./faq/FaqSection";
@@ -22,11 +21,10 @@ export function StudioFullLanding() {
       <CustomCursor />
       <MascotProvider />
       <HeroSection />
-      <TrustSection />
+      <AboutMetricsSection />
       <ServicesSection />
-      <Showcase3DSection />
       <PortfolioSection />
-      <ProcessSection />
+      <AboutWorkflowSection />
       <PricingSection />
       <TestimonialsSection />
       <FaqSection />

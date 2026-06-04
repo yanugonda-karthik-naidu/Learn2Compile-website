@@ -53,16 +53,16 @@ export const SERVICES = [
 ];
 
 export const CONTACT_INFO = {
-  email: "hello@learn2compile.com",
-  phone: "+91-9876543210",
-  whatsapp: "919876543210",
+  email: "karthik7793922519@gmail.com",
+  phone: "+91-7793922519",
+  whatsapp: "917793922519",
   location: "India",
-  address: "Mumbai, Maharashtra, India",
+  address: "India",
 };
 
 export const SOCIAL_LINKS = {
   instagram: "https://instagram.com/learn2compile",
   twitter: "https://x.com/learn2compile",
   linkedin: "https://linkedin.com/company/learn2compile",
-  whatsapp: "https://wa.me/919876543210",
+  whatsapp: "https://wa.me/917793922519",
 };

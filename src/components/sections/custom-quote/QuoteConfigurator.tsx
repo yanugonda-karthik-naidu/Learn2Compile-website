@@ -1,98 +1,171 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { gsap } from "gsap";
 
-type BusinessType = "Landing" | "Business" | "E-Commerce" | "Custom";
-type AnimationTier = "Basic" | "Premium" | "Cinematic";
-type Timeline = "Express" | "Standard" | "Flexible";
+// ============================================
+// TYPES
+// ============================================
 
-const businessTypeCosts: Record<BusinessType, number> = {
-  Landing: 650,
-  Business: 850,
-  "E-Commerce": 1400,
-  Custom: 1200,
+type WebsiteType =
+  | "Business Website"
+  | "Portfolio Website"
+  | "Restaurant Website"
+  | "Wedding Planner Website"
+  | "Coaching Institute Website"
+  | "Startup Website"
+  | "E-Commerce Store"
+  | "Custom Solution";
+
+type PageKey =
+  | "Home"
+  | "About"
+  | "Services"
+  | "Portfolio"
+  | "Gallery"
+  | "Pricing"
+  | "Blog"
+  | "Contact"
+  | "Custom Page";
+
+type DesignExperience = "Professional" | "Premium" | "Signature";
+
+type Timeline = "Flexible" | "Standard" | "Priority";
+
+type Feature = {
+  key: string;
+  label: string;
+  description: string;
+  cost: number;
+  included?: boolean;
 };
 
-const animationTierCosts: Record<AnimationTier, number> = {
-  Basic: 0,
-  Premium: 450,
-  Cinematic: 850,
+// ============================================
+// DATA CONSTANTS
+// ============================================
+
+const websiteTypes: { type: WebsiteType; base: number; icon: string }[] = [
+  { type: "Business Website", base: 6000, icon: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM20 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" },
+  { type: "Portfolio Website", base: 5000, icon: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" },
+  { type: "Restaurant Website", base: 7000, icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93m6.79-3c.13 1.5.21 2.88.21 4.07 0 5.18-3.95 9.45-9 9.93" },
+  { type: "Wedding Planner Website", base: 8000, icon: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" },
+  { type: "Coaching Institute Website", base: 8000, icon: "M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z" },
+  { type: "Startup Website", base: 10000, icon: "M13 10V3L4 14h7v7l9-11h-7z" },
+  { type: "E-Commerce Store", base: 18000, icon: "M3 3h18l-2 13H5L3 3zm0 4h16v2H3V7zm4 6h2v4H7v-4zm4 0h2v4h-2v-4zm4 0h2v4h-2v-4z" },
+  { type: "Custom Solution", base: 12000, icon: "M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" },
+];
+
+const pageOptions: PageKey[] = [
+  "Home",
+  "About",
+  "Services",
+  "Portfolio",
+  "Gallery",
+  "Pricing",
+  "Blog",
+  "Contact",
+  "Custom Page",
+];
+
+const features: Feature[] = [
+  { key: "whatsapp", label: "WhatsApp Integration", description: "Direct messaging from your website", cost: 0, included: true },
+  { key: "contact", label: "Contact Form", description: "Let visitors send you messages", cost: 0, included: true },
+  { key: "maps", label: "Google Maps", description: "Show your location to visitors", cost: 0, included: true },
+  { key: "gallery", label: "Image Gallery", description: "Beautiful photo galleries", cost: 500 },
+  { key: "reviews", label: "Customer Reviews", description: "Show client testimonials", cost: 500 },
+  { key: "booking", label: "Booking System", description: "Appointment scheduling", cost: 1500 },
+  { key: "blog", label: "Blog System", description: "Share news and articles", cost: 1500 },
+  { key: "seo", label: "SEO Setup", description: "Rank higher on Google", cost: 1000 },
+  { key: "analytics", label: "Analytics Setup", description: "Track visitor behavior", cost: 500 },
+  { key: "payment", label: "Payment Gateway", description: "Accept payments online", cost: 2500 },
+  { key: "admin", label: "Admin Dashboard", description: "Manage your own content", cost: 3000 },
+  { key: "login", label: "User Login System", description: "Member accounts area", cost: 2500 },
+  { key: "language", label: "Multi-Language Support", description: "Reach international audiences", cost: 2000 },
+];
+
+const designExperienceOptions: { level: DesignExperience; subtitle: string; multiplier: number }[] = [
+  { level: "Professional", subtitle: "Clean, fast, business-focused", multiplier: 1 },
+  { level: "Premium", subtitle: "Advanced interactions, modern UI", multiplier: 1.15 },
+  { level: "Signature", subtitle: "Luxury presentation, cinematic feel", multiplier: 1.25 },
+];
+
+const timelineOptions: { level: Timeline; subtitle: string; delivery: string; multiplier: number }[] = [
+  { level: "Flexible", subtitle: "Take your time", delivery: "2-3 Weeks", multiplier: 1 },
+  { level: "Standard", subtitle: "Balanced pace", delivery: "1-2 Weeks", multiplier: 1.05 },
+  { level: "Priority", subtitle: "Fast-track delivery", delivery: "Express", multiplier: 1.1 },
+];
+
+// ============================================
+// HELPERS
+// ============================================
+
+const formatINR = (amount: number) =>
+  `₹${Math.round(amount).toLocaleString("en-IN")}`;
+
+const generateRange = (min: number, max: number) => {
+  return { min, max };
 };
 
-const featureOptions = [
-  { key: "seo", label: "SEO optimization", cost: 210 },
-  { key: "forms", label: "Interactive forms", cost: 150 },
-  { key: "cms", label: "CMS-ready structure", cost: 240 },
-  { key: "analytics", label: "Analytics integration", cost: 120 },
-  { key: "perf", label: "Performance tuning", cost: 190 },
-] as const;
-
-const timelineMultipliers: Record<Timeline, number> = {
-  Express: 1.15,
-  Standard: 1.0,
-  Flexible: 0.9,
-};
+// ============================================
+// MAIN COMPONENT
+// ============================================
 
 export function QuoteConfigurator() {
-  const [selectedType, setSelectedType] = useState<BusinessType>("Business");
-  const [selectedTier, setSelectedTier] = useState<AnimationTier>("Premium");
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(["seo"]);
-  const [pages, setPages] = useState(4);
+  const [selectedType, setSelectedType] = useState<WebsiteType>("Business Website");
+  const [selectedPages, setSelectedPages] = useState<PageKey[]>(["Home", "About", "Services", "Contact"]);
+  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(["whatsapp", "contact", "maps"]);
+  const [selectedDesign, setSelectedDesign] = useState<DesignExperience>("Premium");
   const [selectedTimeline, setSelectedTimeline] = useState<Timeline>("Standard");
-
-  const priceRef = useRef<HTMLDivElement>(null);
-  const prevPrice = useRef<number>(0);
-
-  const calculator = useMemo(() => {
-    const baseCost = businessTypeCosts[selectedType];
-    const animationCost = animationTierCosts[selectedTier];
-    const featuresCost = selectedFeatures.reduce((sum, f) => {
-      const option = featureOptions.find((o) => o.key === f);
-      return sum + (option?.cost ?? 0);
-    }, 0);
-    const pagesCost = (pages - 1) * 180;
-    const timelineMultiplier = timelineMultipliers[selectedTimeline];
-
-    const rawTotal = baseCost + animationCost + featuresCost + pagesCost;
-    const total = Math.round(rawTotal * timelineMultiplier * 1.12);
-
-    const deliveryWeeks =
-      total < 2000
-        ? 2
-        : total < 3500
-          ? 3
-          : total < 5500
-            ? 5
-            : total < 8000
-              ? 7
-              : 9;
-
-    const recommended =
-      total < 2000
-        ? "Starter"
-        : total < 5000
-          ? "Growth"
-          : "Premium";
-
-    return { total, deliveryWeeks, recommended };
-  }, [selectedType, selectedTier, selectedFeatures, pages, selectedTimeline]);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (!priceRef.current) return;
-    const obj = { val: prevPrice.current };
-    gsap.to(obj, {
-      val: calculator.total,
-      duration: 0.6,
-      ease: "power2.out",
-      onUpdate: () => {
-        if (priceRef.current) {
-          priceRef.current.textContent = `$${Math.round(obj.val).toLocaleString()}`;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
         }
       },
-    });
-    prevPrice.current = calculator.total;
-  }, [calculator.total]);
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const pricing = useMemo(() => {
+    const typeData = websiteTypes.find((t) => t.type === selectedType)!;
+    const baseCost = typeData.base;
+
+    const pagesCost = Math.max(0, selectedPages.length - 5) * 500;
+
+    const featuresCost = selectedFeatures.reduce((sum, key) => {
+      const feature = features.find((f) => f.key === key);
+      return sum + (feature?.cost ?? 0);
+    }, 0);
+
+    const designOption = designExperienceOptions.find((d) => d.level === selectedDesign)!;
+    const timelineOption = timelineOptions.find((t) => t.level === selectedTimeline)!;
+
+    const subtotal = baseCost + pagesCost + featuresCost;
+    const multiplier = designOption.multiplier * timelineOption.multiplier;
+
+    const calculated = Math.round(subtotal * multiplier);
+    const variance = Math.round(calculated * 0.12);
+
+    return generateRange(calculated - variance, calculated + variance);
+  }, [selectedType, selectedPages, selectedFeatures, selectedDesign, selectedTimeline]);
+
+  const selectedTypeData = websiteTypes.find((t) => t.type === selectedType)!;
+
+  const togglePage = (page: PageKey) => {
+    setSelectedPages((prev) =>
+      prev.includes(page) ? prev.filter((p) => p !== page) : [...prev, page]
+    );
+  };
 
   const toggleFeature = (key: string) => {
     setSelectedFeatures((prev) =>
@@ -100,133 +173,278 @@ export function QuoteConfigurator() {
     );
   };
 
+  const handleWhatsApp = () => {
+    const pagesList = selectedPages.join(", ");
+    const featuresList = selectedFeatures
+      .map((key) => features.find((f) => f.key === key)?.label)
+      .filter(Boolean)
+      .join(", ");
+
+    const message = `Hello Learn2Compile,
+
+I would like a website consultation.
+
+Website Type: ${selectedType}
+Pages: ${pagesList}
+Features: ${featuresList}
+Design Experience: ${selectedDesign}
+Timeline: ${selectedTimeline}
+Estimated Range: ${formatINR(pricing.min)} - ${formatINR(pricing.max)}
+
+Please send me a detailed proposal and consultation.
+
+Thank you.`;
+
+    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
-    <section className="relative bg-[#050816] py-24">
-      <div className="mx-auto max-w-6xl px-6">
-        {/* Section header */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
-              <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
-              Website configurator
-            </div>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Plan your project scope.
-            </h2>
+    <section ref={sectionRef} id="quote-configurator" className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
+      {/* Background glow effects */}
+      <div className="pointer-events-none absolute inset-0 opacity-60">
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2"
+          style={{
+            background:
+              "radial-gradient(ellipse 800px at 50% 0%, rgba(56,189,248,0.12), transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute bottom-0 right-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 500px at 100% 100%, rgba(139,92,246,0.10), transparent 70%)",
+          }}
+        />
+      </div>
+
+      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+        {/* ============================================ */}
+        {/* SECTION HEADER */}
+        {/* ============================================ */}
+        <div
+          className={`mx-auto max-w-[700px] text-center transition-all duration-700 ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+          }`}
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs text-white/80">
+            <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
+            Website Planning Assistant
           </div>
-          <p className="max-w-xl text-sm leading-6 text-white/70">
-            Configure your website requirements to see an estimated scope. This
-            helps us understand your needs before the consultation.
+
+          <h2 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+            Plan Your{" "}
+            <span className="bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] bg-clip-text text-transparent">
+              Website Project
+            </span>
+          </h2>
+
+          <p className="mt-4 text-sm leading-relaxed text-white/60 sm:text-base">
+            Answer a few simple questions and receive a realistic project estimate,
+            recommended website scope, and consultation summary.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-2">
-          {/* Left: Configuration options */}
-          <div className="space-y-6">
-            {/* Business type */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Business type</div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {(Object.keys(businessTypeCosts) as BusinessType[]).map((type) => (
+        {/* ============================================ */}
+        {/* MAIN LAYOUT */}
+        {/* ============================================ */}
+        <div className="mt-16 grid gap-8 lg:grid-cols-5">
+          {/* ============================================ */}
+          {/* LEFT: QUESTION FLOW (60%) */}
+          {/* ============================================ */}
+          <div className="space-y-6 lg:col-span-3">
+            {/* ============================================ */}
+            {/* STEP 1: WEBSITE TYPE */}
+            {/* ============================================ */}
+            <div
+              className={`rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-700 ${
+                isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+              style={{ transitionDelay: "100ms" }}
+            >
+              <div className="mb-5">
+                <div className="mb-1 text-xs font-medium uppercase tracking-wider text-white/40">
+                  Step 1 of 5
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  What type of website do you need?
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {websiteTypes.map((item) => (
                   <button
-                    key={type}
-                    onClick={() => setSelectedType(type)}
-                    className={`rounded-xl border px-4 py-3 text-sm transition-all duration-200 ${
-                      selectedType === type
-                        ? "border-[#38BDF8]/50 bg-[#38BDF8]/10 text-white"
-                        : "border-white/10 bg-white/5 text-white/70 hover:border-white/20"
+                    key={item.type}
+                    onClick={() => setSelectedType(item.type)}
+                    className={`group relative min-h-[100px] rounded-xl border p-3 text-left transition-all duration-300 ${
+                      selectedType === item.type
+                        ? "border-[#38BDF8]/50 bg-[#38BDF8]/10 shadow-[0_0_30px_rgba(56,189,248,0.15)]"
+                        : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/[0.07]"
                     }`}
                   >
-                    {type}
+                    <div
+                      className={`mb-2 flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                        selectedType === item.type
+                          ? "bg-[#38BDF8]/20"
+                          : "bg-white/5"
+                      }`}
+                    >
+                      <svg
+                        className={`h-4 w-4 ${
+                          selectedType === item.type ? "text-[#38BDF8]" : "text-white/50"
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                      </svg>
+                    </div>
+
+                    <div
+                      className={`text-[11px] font-medium leading-tight ${
+                        selectedType === item.type ? "text-white" : "text-white/70"
+                      }`}
+                    >
+                      {item.type}
+                    </div>
+
+                    {selectedType === item.type && (
+                      <div className="absolute inset-0 rounded-xl border border-[#38BDF8]/30" />
+                    )}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Animation tier */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Animation tier</div>
-              <div className="mt-4 flex gap-2">
-                {(Object.keys(animationTierCosts) as AnimationTier[]).map((tier) => (
-                  <button
-                    key={tier}
-                    onClick={() => setSelectedTier(tier)}
-                    className={`flex-1 rounded-xl border px-4 py-3 text-sm transition-all duration-200 ${
-                      selectedTier === tier
-                        ? "border-[#8B5CF6]/50 bg-[#8B5CF6]/10 text-white"
-                        : "border-white/10 bg-white/5 text-white/70 hover:border-white/20"
-                    }`}
-                  >
-                    {tier}
-                  </button>
-                ))}
+            {/* ============================================ */}
+            {/* STEP 2: PAGES REQUIRED */}
+            {/* ============================================ */}
+            <div
+              className={`rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-700 ${
+                isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+              style={{ transitionDelay: "200ms" }}
+            >
+              <div className="mb-5">
+                <div className="mb-1 text-xs font-medium uppercase tracking-wider text-white/40">
+                  Step 2 of 5
+                </div>
+                <h3 className="text-lg font-semibold text-white">Pages required</h3>
               </div>
+
+              <div className="mb-4 flex flex-wrap gap-2">
+                {pageOptions.map((page) => {
+                  const isSelected = selectedPages.includes(page);
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => togglePage(page)}
+                      className={`rounded-lg px-3 py-2 text-sm transition-all duration-200 min-h-[44px] ${
+                        isSelected
+                          ? "border border-[#38BDF8]/50 bg-[#38BDF8]/15 text-white"
+                          : "border border-white/10 bg-white/5 text-white/60 hover:border-white/20"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                <span className="text-sm text-white/60">Selected Pages</span>
+                <span className="text-lg font-semibold text-[#38BDF8]">
+                  {selectedPages.length}
+                </span>
+              </div>
+
+              {selectedPages.length > 5 && (
+                <p className="mt-2 text-xs text-white/40">
+                  +₹500 for each page beyond 5 included
+                </p>
+              )}
             </div>
 
-            {/* Pages slider */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-white">Pages / modules</div>
-                <div className="text-2xl font-semibold text-[#06B6D4]">{pages}</div>
+            {/* ============================================ */}
+            {/* STEP 3: FEATURES REQUIRED */}
+            {/* ============================================ */}
+            <div
+              className={`rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-700 ${
+                isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+              style={{ transitionDelay: "300ms" }}
+            >
+              <div className="mb-5">
+                <div className="mb-1 text-xs font-medium uppercase tracking-wider text-white/40">
+                  Step 3 of 5
+                </div>
+                <h3 className="text-lg font-semibold text-white">Features required</h3>
               </div>
-              <input
-                type="range"
-                min={1}
-                max={15}
-                value={pages}
-                onChange={(e) => setPages(Number(e.target.value))}
-                className="mt-4 w-full appearance-none cursor-pointer rounded-lg bg-white/10 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#38BDF8] [&::-webkit-slider-thumb]:shadow-[0_0_20px_rgba(56,189,248,0.5)]"
-              />
-              <div className="mt-2 flex justify-between text-xs text-white/50">
-                <span>1 page</span>
-                <span>15+ pages</span>
-              </div>
-            </div>
 
-            {/* Features */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Premium features</div>
-              <div className="mt-4 space-y-2">
-                {featureOptions.map((feature) => {
-                  const checked = selectedFeatures.includes(feature.key);
+              <div className="grid gap-2 sm:grid-cols-2">
+                {features.map((feature) => {
+                  const isSelected = selectedFeatures.includes(feature.key);
+                  const isIncluded = feature.included;
+
                   return (
                     <button
                       key={feature.key}
-                      onClick={() => toggleFeature(feature.key)}
-                      className={`flex w-full items-center justify-between gap-4 rounded-xl border px-4 py-3 text-sm transition-all duration-200 ${
-                        checked
+                      onClick={() => !isIncluded && toggleFeature(feature.key)}
+                      disabled={isIncluded}
+                      className={`group relative flex items-center justify-between rounded-xl border p-4 text-left transition-all duration-200 min-h-[72px] ${
+                        isSelected && !isIncluded
                           ? "border-[#38BDF8]/40 bg-[#38BDF8]/10"
+                          : isIncluded
+                          ? "border-[#22D3EE]/20 bg-[#22D3EE]/5 cursor-default"
                           : "border-white/10 bg-white/5 hover:border-white/20"
                       }`}
                     >
-                      <span className={checked ? "text-white" : "text-white/70"}>
-                        {feature.label}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-white/50">+${feature.cost}</span>
+                      <div>
                         <div
-                          className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all duration-200 ${
-                            checked
-                              ? "border-[#38BDF8] bg-[#38BDF8]/20"
-                              : "border-white/20"
+                          className={`text-sm font-medium ${
+                            isSelected || isIncluded ? "text-white" : "text-white/70"
                           }`}
                         >
-                          {checked && (
-                            <svg
-                              className="h-3 w-3 text-[#38BDF8]"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          )}
+                          {feature.label}
                         </div>
+                        <div className="text-xs text-white/40">{feature.description}</div>
+                      </div>
+
+                      <div className="ml-3 flex flex-shrink-0 items-center gap-2">
+                        {isIncluded ? (
+                          <span className="rounded-full bg-[#22D3EE]/15 px-2.5 py-1 text-xs font-medium text-[#22D3EE]">
+                            Included
+                          </span>
+                        ) : (
+                          <span className="text-sm font-medium text-white/50">
+                            {formatINR(feature.cost)}
+                          </span>
+                        )}
+
+                        {!isIncluded && (
+                          <div
+                            className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all ${
+                              isSelected
+                                ? "border-[#38BDF8] bg-[#38BDF8]/20"
+                                : "border-white/20"
+                            }`}
+                          >
+                            {isSelected && (
+                              <svg
+                                className="h-3 w-3 text-[#38BDF8]"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={3}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </button>
                   );
@@ -234,133 +452,253 @@ export function QuoteConfigurator() {
               </div>
             </div>
 
-            {/* Timeline */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Timeline priority</div>
-              <div className="mt-4 flex gap-2">
-                {(Object.keys(timelineMultipliers) as Timeline[]).map((tl) => (
+            {/* ============================================ */}
+            {/* STEP 4: DESIGN EXPERIENCE */}
+            {/* ============================================ */}
+            <div
+              className={`rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-700 ${
+                isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+              style={{ transitionDelay: "400ms" }}
+            >
+              <div className="mb-5">
+                <div className="mb-1 text-xs font-medium uppercase tracking-wider text-white/40">
+                  Step 4 of 5
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  How premium should your website feel?
+                </h3>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {designExperienceOptions.map((option) => (
                   <button
-                    key={tl}
-                    onClick={() => setSelectedTimeline(tl)}
-                    className={`flex-1 rounded-xl border px-4 py-3 text-sm transition-all duration-200 ${
-                      selectedTimeline === tl
-                        ? "border-[#06B6D4]/50 bg-[#06B6D4]/10 text-white"
-                        : "border-white/10 bg-white/5 text-white/70 hover:border-white/20"
+                    key={option.level}
+                    onClick={() => setSelectedDesign(option.level)}
+                    className={`relative rounded-xl border p-4 text-left transition-all duration-300 min-h-[90px] ${
+                      selectedDesign === option.level
+                        ? "border-[#8B5CF6]/50 bg-[#8B5CF6]/10 shadow-[0_0_30px_rgba(139,92,246,0.15)]"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
                     }`}
                   >
-                    {tl}
-                    {tl === "Express" && (
-                      <span className="ml-1 text-xs text-[#06B6D4]">+15%</span>
+                    <div className={`mb-2 text-sm font-semibold ${
+                      selectedDesign === option.level ? "text-white" : "text-white/70"
+                    }`}>
+                      {option.level}
+                    </div>
+                    <div className="text-xs text-white/50">{option.subtitle}</div>
+
+                    {option.multiplier > 1 && (
+                      <div className="mt-2 inline-block rounded-full bg-[#8B5CF6]/15 px-2 py-1 text-xs font-medium text-[#8B5CF6]">
+                        +{Math.round((option.multiplier - 1) * 100)}%
+                      </div>
                     )}
-                    {tl === "Flexible" && (
-                      <span className="ml-1 text-xs text-white/50">-10%</span>
+
+                    {option.multiplier === 1 && (
+                      <div className="mt-2 inline-block rounded-full bg-white/10 px-2 py-1 text-xs font-medium text-white/60">
+                        Included
+                      </div>
+                    )}
+
+                    {selectedDesign === option.level && (
+                      <div className="absolute inset-0 rounded-xl border border-[#8B5CF6]/30" />
                     )}
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* ============================================ */}
+            {/* STEP 5: DELIVERY TIMELINE */}
+            {/* ============================================ */}
+            <div
+              className={`rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-700 ${
+                isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+              style={{ transitionDelay: "500ms" }}
+            >
+              <div className="mb-5">
+                <div className="mb-1 text-xs font-medium uppercase tracking-wider text-white/40">
+                  Step 5 of 5
+                </div>
+                <h3 className="text-lg font-semibold text-white">Delivery timeline</h3>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {timelineOptions.map((option) => (
+                  <button
+                    key={option.level}
+                    onClick={() => setSelectedTimeline(option.level)}
+                    className={`relative rounded-xl border p-4 text-left transition-all duration-300 min-h-[90px] ${
+                      selectedTimeline === option.level
+                        ? "border-[#06B6D4]/50 bg-[#06B6D4]/10 shadow-[0_0_30px_rgba(6,182,212,0.15)]"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <div
+                      className={`mb-2 text-sm font-semibold ${
+                        selectedTimeline === option.level ? "text-white" : "text-white/70"
+                      }`}
+                    >
+                      {option.level}
+                    </div>
+                    <div className="text-xs text-white/50">{option.subtitle}</div>
+                    <div className="mt-2 text-sm font-medium text-white/70">
+                      {option.delivery}
+                    </div>
+
+                    {option.multiplier > 1 && (
+                      <div className="mt-2 inline-block rounded-full bg-[#06B6D4]/15 px-2 py-1 text-xs font-medium text-[#06B6D4]">
+                        +{Math.round((option.multiplier - 1) * 100)}%
+                      </div>
+                    )}
+
+                    {option.multiplier === 1 && (
+                      <div className="mt-2 inline-block rounded-full bg-white/10 px-2 py-1 text-xs font-medium text-white/60">
+                        Included
+                      </div>
+                    )}
+
+                    {selectedTimeline === option.level && (
+                      <div className="absolute inset-0 rounded-xl border border-[#06B6D4]/30" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ============================================ */}
+            {/* WHAT HAPPENS NEXT - TRUST CARD */}
+            {/* ============================================ */}
+            <div
+              className={`rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.05] to-transparent p-6 transition-all duration-700 ${
+                isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+              style={{ transitionDelay: "600ms" }}
+            >
+              <h4 className="mb-4 text-sm font-semibold text-white">What happens next?</h4>
+
+              <div className="space-y-3">
+                {[
+                  { num: "1", text: "We review your requirements." },
+                  { num: "2", text: "We prepare a personalized recommendation." },
+                  { num: "3", text: "We contact you within 24 hours." },
+                  { num: "4", text: "Final pricing is confirmed after discussion." },
+                ].map((item) => (
+                  <div key={item.num} className="flex items-center gap-3">
+                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white/70">
+                      {item.num}
+                    </div>
+                    <span className="text-sm text-white/60">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Right: Live estimate */}
-          <div className="sticky top-24 h-fit">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+          {/* ============================================ */}
+          {/* RIGHT: LIVE PROJECT SUMMARY (40%) */}
+          {/* ============================================ */}
+          <div className="lg:col-span-2">
+            <div className="lg:sticky lg:top-24">
               <div
-                className="pointer-events-none absolute inset-0 rounded-3xl opacity-70"
-                style={{
-                  background:
-                    "radial-gradient(600px circle at 50% 0%, rgba(56,189,248,0.15), transparent 55%), radial-gradient(500px circle at 80% 70%, rgba(139,92,246,0.12), transparent 55%)",
-                }}
-              />
+                className={`rounded-2xl border border-white/10 bg-white/5 p-6 transition-all duration-700 ${
+                  isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                }`}
+                style={{ transitionDelay: "200ms" }}
+              >
+                <h4 className="text-sm font-semibold uppercase tracking-wider text-white/60">
+                  Project Summary
+                </h4>
 
-              <div className="relative">
-                <div className="text-xs uppercase tracking-[0.25em] text-white/60">
-                  Estimated scope
+                {/* Summary items */}
+                <div className="mt-5 space-y-4">
+                  <div className="flex items-start justify-between">
+                    <span className="text-sm text-white/50">Website Type</span>
+                    <span className="text-sm text-right font-medium text-white">
+                      {selectedType}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start justify-between">
+                    <span className="text-sm text-white/50">Pages Selected</span>
+                    <span className="text-sm font-medium text-white">
+                      {selectedPages.length}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start justify-between">
+                    <span className="text-sm text-white/50">Features Selected</span>
+                    <span className="text-sm font-medium text-white">
+                      {selectedFeatures.length}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start justify-between">
+                    <span className="text-sm text-white/50">Design Experience</span>
+                    <span className="text-sm font-medium text-white">{selectedDesign}</span>
+                  </div>
+
+                  <div className="flex items-start justify-between">
+                    <span className="text-sm text-white/50">Timeline</span>
+                    <span className="text-sm font-medium text-white">
+                      {timelineOptions.find((t) => t.level === selectedTimeline)?.delivery}
+                    </span>
+                  </div>
                 </div>
-                <div
-                  ref={priceRef}
-                  className="mt-2 text-5xl font-semibold text-white"
-                >
-                  ${calculator.total.toLocaleString()}
-                </div>
-                <div className="mt-2 text-sm text-white/70">
-                  Estimated delivery:{" "}
-                  <span className="font-semibold text-white">
-                    {calculator.deliveryWeeks} weeks
+
+                <div className="mt-5 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+                {/* Estimated investment */}
+                <div className="mt-5">
+                  <span className="text-xs font-medium uppercase tracking-wider text-white/40">
+                    Estimated Investment
                   </span>
-                </div>
 
-                <div className="mt-4 rounded-2xl border border-[#8B5CF6]/30 bg-[#8B5CF6]/10 px-4 py-2">
-                  <div className="text-xs text-white/50">
-                    Recommended package
-                  </div>
-                  <div className="mt-1 text-lg font-semibold text-[#8B5CF6]">
-                    {calculator.recommended}
+                  <div className="mt-2 text-3xl font-semibold text-white sm:text-4xl">
+                    {formatINR(pricing.min)}{" "}
+                    <span className="text-lg text-white/30">–</span>{" "}
+                    {formatINR(pricing.max)}
                   </div>
                 </div>
 
-                <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                {/* Selected summary */}
-                <div className="mt-6 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/60">Base ({selectedType})</span>
-                    <span className="text-white">
-                      ${businessTypeCosts[selectedType].toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/60">Animation ({selectedTier})</span>
-                    <span className="text-white">
-                      ${animationTierCosts[selectedTier].toLocaleString()}
-                    </span>
-                  </div>
-                  {selectedFeatures.length > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/60">Features ({selectedFeatures.length})</span>
-                      <span className="text-white">
-                        ${featureOptions
-                          .filter((f) => selectedFeatures.includes(f.key))
-                          .reduce((sum, f) => sum + f.cost, 0)
-                          .toLocaleString()}
-                      </span>
-                    </div>
-                  )}
+                {/* Trust message */}
+                <div className="mt-5 rounded-xl border border-[#38BDF8]/20 bg-[#38BDF8]/5 p-4">
+                  <p className="text-xs leading-relaxed text-white/60">
+                    <span className="font-medium text-[#38BDF8]">Planning estimates only.</span>{" "}
+                    Final scope, features, and pricing will be confirmed during consultation.
+                    Most projects are customized based on business goals and requirements.
+                  </p>
                 </div>
 
-                <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                <p className="mt-4 text-xs text-white/50">
-                  This estimate is for planning purposes. Final scope is confirmed
-                  during our discovery call.
-                </p>
-
-                <div className="mt-6 flex flex-col gap-3">
-                  <a
-                    href="#quote-form"
-                    className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#38BDF8]/30 via-[#8B5CF6]/30 to-[#06B6D4]/30 px-6 py-3 text-sm font-medium text-white shadow-[0_0_30px_rgba(56,189,248,0.15)] transition-all duration-300 hover:from-[#38BDF8]/45 hover:via-[#8B5CF6]/45 hover:to-[#06B6D4]/45"
+                {/* CTA Button */}
+                <button
+                  onClick={handleWhatsApp}
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#38BDF8]/30 via-[#8B5CF6]/30 to-[#06B6D4]/30 px-6 py-4 text-sm font-medium text-white shadow-[0_0_30px_rgba(56,189,248,0.15)] transition-all duration-300 hover:from-[#38BDF8]/45 hover:via-[#8B5CF6]/45 hover:to-[#06B6D4]/45"
+                >
+                  Get Detailed Proposal
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
                   >
-                    Start Consultation with This Scope
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M17 8l4 4m0 0l-4 4m4-4H3"
-                      />
-                    </svg>
-                  </a>
-                  <a
-                    href="/pricing"
-                    className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-white/20 hover:bg-white/10"
-                  >
-                    View All Packages
-                  </a>
-                </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </button>
+
+                {/* Secondary CTA */}
+                <a
+                  href="/pricing"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-white/20 hover:bg-white/10"
+                >
+                  View All Packages
+                </a>
               </div>
             </div>
           </div>

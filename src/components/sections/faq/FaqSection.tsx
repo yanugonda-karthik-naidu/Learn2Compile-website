@@ -191,45 +191,32 @@ function FaqCategoryTabs({
   activeCategory: string;
   onSelect: (id: string) => void;
 }) {
-  const indicatorRef = useRef<HTMLDivElement>(null);
-  const tabsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!tabsRef.current || !indicatorRef.current) return;
-    const activeTab = tabsRef.current.querySelector<HTMLButtonElement>(`[data-category="${activeCategory}"]`);
-    if (!activeTab) return;
-    gsap.to(indicatorRef.current, {
-      x: activeTab.offsetLeft,
-      width: activeTab.offsetWidth,
-      duration: motion.hover.duration.normal,
-      ease: motion.hover.ease,
-    });
-  }, [activeCategory]);
-
   return (
-    <div ref={tabsRef} className="relative flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-white/5 p-1.5">
-      {categories.map((cat) => (
-        <button
-          key={cat.id}
-          data-category={cat.id}
-          onClick={() => onSelect(cat.id)}
-          className={`relative flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium transition-all duration-200 ${
-            activeCategory === cat.id
-              ? "bg-white/10 text-white"
-              : "text-white/60 hover:text-white"
-          }`}
-        >
-          <span className={`${activeCategory === cat.id ? "text-[#38BDF8]" : "text-white/40"}`}>
-            {cat.icon}
-          </span>
-          {cat.label}
-        </button>
-      ))}
-      <div
-        ref={indicatorRef}
-        className="pointer-events-none absolute bottom-1 left-0 top-1 rounded-xl bg-white/10"
-        style={{ height: "calc(100% - 8px)" }}
-      />
+    <div className="relative flex gap-2 overflow-x-auto snap-x snap-mandatory rounded-full border border-white/10 bg-white/5 p-1.5 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {categories.map((cat) => {
+        const isActive = activeCategory === cat.id;
+        return (
+          <button
+            key={cat.id}
+            data-category={cat.id}
+            onClick={() => onSelect(cat.id)}
+            className={`
+              relative flex items-center gap-2 shrink-0 snap-start
+              rounded-full px-4 py-2.5 text-sm font-medium
+              transition-all duration-300 ease-out
+              ${isActive
+                ? "bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6] text-white shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+                : "bg-white/[0.03] text-white/60 hover:text-white"
+              }
+            `}
+          >
+            <span className={`${isActive ? "text-white" : "text-white/40"} shrink-0`}>
+              {cat.icon}
+            </span>
+            <span className="truncate">{cat.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -239,105 +226,75 @@ function FaqItem({
   isOpen,
   onToggle,
   query,
-  index,
 }: {
   item: FaqItem;
   isOpen: boolean;
   onToggle: () => void;
   query: string;
-  index: number;
 }) {
   const answerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const itemRef = useRef<HTMLDivElement>(null);
 
-  // Cinematic accordion animation with personality
   useEffect(() => {
-    if (!answerRef.current || !contentRef.current) return;
+    if (!answerRef.current || !contentRef.current || !itemRef.current) return;
 
     if (isOpen) {
       const h = answerRef.current.scrollHeight;
-      const tl = gsap.timeline();
-
-      // Anticipation - subtle scale
-      tl.to(itemRef.current, {
-        scale: 1.005,
-        duration: 0.08,
-        ease: "power2.in",
-      })
-        .to(
-          contentRef.current,
-          {
-            height: h,
-            duration: motion.expand.duration,
-            ease: motion.expand.ease,
-          },
-          0.04
-        )
-        .to(
-          contentRef.current.querySelector("p"),
-          {
-            opacity: 1,
-            y: 0,
-            duration: motion.expand.contentFade.duration,
-            ease: "power2.out",
-          },
-          0.15
-        );
+      gsap.to(contentRef.current, {
+        height: h,
+        duration: motion.expand.duration,
+        ease: motion.expand.ease,
+      });
+      gsap.to(contentRef.current.querySelector("p"), {
+        opacity: 1,
+        y: 0,
+        duration: motion.expand.contentFade.duration,
+        ease: "power2.out",
+        delay: 0.08,
+      });
     } else {
-      const tl = gsap.timeline();
-
-      // Smooth collapse with content fade first
-      tl.to(contentRef.current.querySelector("p"), {
+      gsap.to(contentRef.current.querySelector("p"), {
         opacity: 0,
         y: 6,
-        duration: 0.18,
+        duration: 0.15,
         ease: "power2.in",
-      })
-        .to(
-          contentRef.current,
-          {
-            height: 0,
-            duration: motion.expand.duration * 0.85,
-            ease: motion.expand.ease,
-          },
-          0.08
-        )
-        .to(
-          itemRef.current,
-          {
-            scale: 1,
-            duration: 0.15,
-            ease: "power2.out",
-          },
-          0.05
-        );
+      });
+      gsap.to(contentRef.current, {
+        height: 0,
+        duration: motion.expand.duration * 0.85,
+        ease: motion.expand.ease,
+      });
     }
   }, [isOpen]);
 
   return (
     <div
       ref={itemRef}
-      className="overflow-hidden rounded-2xl border border-white/10 bg-[#050816]/40 transition-all duration-300 hover:border-white/20"
+      className="overflow-hidden rounded-3xl border border-white/10 bg-[rgba(12,18,40,0.55)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[rgba(56,189,248,0.25)]"
       data-stagger-item
       style={{ transformOrigin: "top center" }}
     >
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-4 p-5 text-left transition-all duration-200"
+        className="flex w-full items-center justify-between gap-4 p-6 text-left transition-all duration-200"
         aria-expanded={isOpen}
       >
-        <span className="text-sm font-medium text-white leading-snug pr-2">
+        <span className="text-base font-semibold text-white leading-snug pr-4">
           {highlightMatch(item.q, query)}
         </span>
         <span
-          className={`relative h-5 w-5 shrink-0 text-white/50 transition-all duration-300 ${
-            isOpen ? "rotate-45 scale-110" : "rotate-0"
-          }`}
+          className={`
+            relative shrink-0 flex items-center justify-center
+            w-10 h-10 rounded-full
+            bg-white/[0.04] border border-white/[0.08]
+            text-white/50 transition-all duration-300
+            ${isOpen ? "rotate-45 bg-[#38BDF8]/20 border-[#38BDF8]/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]" : "rotate-0"}
+          `}
         >
           <svg
-            className="absolute inset-0 h-full w-full"
+            className="absolute inset-0 h-5 w-5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -353,8 +310,8 @@ function FaqItem({
       </button>
 
       <div ref={contentRef} className="overflow-hidden" style={{ height: 0 }}>
-        <div ref={answerRef} className="px-5 pb-5">
-          <p className="text-sm leading-relaxed text-white/70">{highlightMatch(item.a, query)}</p>
+        <div ref={answerRef} className="px-6 pb-6 pt-4">
+          <p className="text-base leading-[1.8] text-white/70 max-w-[90%]">{highlightMatch(item.a, query)}</p>
         </div>
       </div>
     </div>
@@ -409,7 +366,7 @@ export function FaqSection({ searchQuery = "" }: FaqSectionProps) {
         stagger: motion.reveal.stagger.fast,
       }
     );
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, filteredData.length]);
 
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -419,9 +376,13 @@ export function FaqSection({ searchQuery = "" }: FaqSectionProps) {
         start: "top 80%",
         once: true,
         onEnter: () => {
-          const tabs = sectionRef.current?.querySelector("[data-faq-header]");
-          if (tabs) {
-            gsap.fromTo(tabs, { opacity: 0, y: motion.reveal.y.normal }, { opacity: 1, y: 0, duration: motion.reveal.duration.normal, ease: "power3.out" });
+          const header = sectionRef.current?.querySelector("[data-faq-header]");
+          if (header) {
+            gsap.fromTo(
+              header,
+              { opacity: 0, y: motion.reveal.y.normal },
+              { opacity: 1, y: 0, duration: motion.reveal.duration.normal, ease: "power3.out" }
+            );
           }
         },
       });
@@ -430,23 +391,29 @@ export function FaqSection({ searchQuery = "" }: FaqSectionProps) {
   }, []);
 
   const hasResults = filteredData.length > 0;
+  const showEmptyState = !hasResults || activeData.items.length === 0;
 
   return (
-    <section ref={sectionRef} className="relative bg-[#050816] py-20" data-section="faq">
-      <div className="mx-auto max-w-6xl px-6">
-        <div data-faq-header className="mb-10 opacity-0">
-          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
-                <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
-                Browse by topic
-              </div>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Find your answer
-              </h2>
+    <section ref={sectionRef} className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden" data-section="faq">
+      {/* Background effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-[#38BDF8]/[0.03] blur-[150px]" />
+      </div>
+
+      <div className="relative mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+        <div data-faq-header className="mb-12 opacity-0">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/80">
+              <span className="h-2 w-2 rounded-full bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6] shadow-[0_0_12px_rgba(56,189,248,0.5)]" />
+              Browse by topic
             </div>
-            <p className="max-w-xl text-sm leading-6 text-white/70">
-              Structured answers across every dimension of your project—from first enquiry to post-launch support.
+            <h2 className="mt-6 text-[clamp(2.5rem,5vw,4rem)] font-semibold tracking-tight">
+              <span className="bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
+                Find Your Answer
+              </span>
+            </h2>
+            <p className="mx-auto mt-5 max-w-[700px] text-base text-white/60">
+              Structured answers across every stage of your project journey — from first enquiry to post-launch support.
             </p>
           </div>
         </div>
@@ -457,21 +424,21 @@ export function FaqSection({ searchQuery = "" }: FaqSectionProps) {
           onSelect={handleCategorySelect}
         />
 
-        <div ref={listRef} className="mt-8 space-y-2">
-          {!hasResults ? (
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-12 text-center">
+        <div ref={listRef} className="mt-8 space-y-3">
+          {showEmptyState ? (
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-12 text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/5">
                 <svg className="h-6 w-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-white/80">No results found</p>
-              <p className="mt-1 text-xs text-white/50">
+              <p className="text-sm font-medium text-white/80">No questions available in this category yet.</p>
+              <p className="mt-1 text-sm text-white/50">
                 Contact us directly and we will answer personally.
               </p>
               <a
                 href="/contact"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/70 transition hover:border-white/20 hover:text-white"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70 transition-all duration-300 hover:border-white/20 hover:text-white"
               >
                 Get in touch
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -487,7 +454,6 @@ export function FaqSection({ searchQuery = "" }: FaqSectionProps) {
                 isOpen={openIndex === idx}
                 onToggle={() => setOpenIndex(openIndex === idx ? null : idx)}
                 query={searchQuery}
-                index={idx}
               />
             ))
           )}

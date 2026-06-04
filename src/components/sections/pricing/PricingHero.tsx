@@ -1,28 +1,121 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { StudioEnvironment } from "@/components/3d/environments/StudioEnvironment";
-import { AtmosphericLayer } from "@/components/sections/cinematic/AtmosphericLayer";
 import { gsap } from "gsap";
 import { motion } from "@/lib/gsap/config";
 import { useMotion } from "@/hooks/useMotion";
 
+const trustIndicators = [
+  { text: "Fixed Scope Pricing" },
+  { text: "SEO Foundation Included" },
+  { text: "Mobile Responsive Included" },
+  { text: "Performance Optimized" },
+  { text: "Post Launch Support" },
+  { text: "Conversion Focused Structure" },
+];
+
+const philosophyFeatures = [
+  "Premium Design Systems",
+  "Conversion Focused UX",
+  "Performance First Development",
+  "SEO Ready Architecture",
+  "Mobile First Engineering",
+  "Ongoing Support Options",
+];
+
+const metrics = [
+  { value: "10+", label: "Projects Delivered" },
+  { value: "98%", label: "Client Satisfaction" },
+  { value: "24/7", label: "Support Availability" },
+];
+
 export function PricingHero() {
   const { reduced } = useMotion();
   const heroRef = useRef<HTMLDivElement>(null);
-  const eyebrowRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const microLabelRef = useRef<HTMLDivElement>(null);
+  const titleLine1Ref = useRef<HTMLSpanElement>(null);
+  const titleLine2Ref = useRef<HTMLSpanElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const trustRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const credibilityRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const cardFeaturesRef = useRef<(HTMLLIElement | null)[]>([]);
+  const metricsRef = useRef<HTMLDivElement>(null);
+  const floatingOrbRef = useRef<HTMLDivElement>(null);
+  const rupeeIconRef = useRef<HTMLDivElement>(null);
+  const starIconRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (reduced) return;
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ delay: motion.hero.delay });
-      tl.fromTo(eyebrowRef.current, { y: motion.hero.badge.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.badge.duration, ease: motion.hero.badge.ease })
-        .fromTo(titleRef.current, { y: motion.hero.title.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.title.duration, ease: motion.hero.title.ease }, motion.hero.title.overlap)
-        .fromTo(subtitleRef.current, { y: motion.hero.subtitle.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.subtitle.duration, ease: motion.hero.subtitle.ease }, motion.hero.subtitle.overlap)
-        .fromTo(ctaRef.current, { y: motion.hero.cta.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.cta.duration, ease: motion.hero.cta.ease }, motion.hero.cta.overlap);
+
+      // Badge and micro label
+      tl.fromTo(badgeRef.current, { y: motion.hero.badge.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.badge.duration, ease: motion.hero.badge.ease })
+        .fromTo(microLabelRef.current, { y: 8, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.3")
+        // Title lines reveal
+        .fromTo(titleLine1Ref.current, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "expo.out" }, "-=0.2")
+        .fromTo(titleLine2Ref.current, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "expo.out" }, "-=0.5")
+        // Description and trust
+        .fromTo(descriptionRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power2.out" }, "-=0.4")
+        .fromTo(trustRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" }, "-=0.3")
+        // CTA and credibility
+        .fromTo(ctaRef.current, { y: motion.hero.cta.y, opacity: 0 }, { y: 0, opacity: 1, duration: motion.hero.cta.duration, ease: motion.hero.cta.ease }, "-=0.2")
+        .fromTo(credibilityRef.current, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.2")
+        // Right side card
+        .fromTo(cardRef.current, { x: 40, opacity: 0 }, { x: 0, opacity: 1, duration: 1.0, ease: "power3.out" }, "-=0.8")
+        .fromTo(cardFeaturesRef.current.filter(Boolean), { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.06, ease: "power2.out" }, "-=0.4")
+        .fromTo(metricsRef.current, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, "-=0.2");
+
+      // Floating orb animation
+      gsap.to(floatingOrbRef.current, {
+        y: -20,
+        x: 10,
+        duration: 6,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      // Badge glow pulse
+      gsap.to(".badge-glow", {
+        boxShadow: "0 0 25px rgba(56,189,248,0.8)",
+        duration: 1.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      // Floating rupee icon animation
+      gsap.to(rupeeIconRef.current, {
+        y: -6,
+        duration: 4.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      // Floating star icon animation
+      gsap.to(starIconRef.current, {
+        y: 6,
+        duration: 5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      // Card hover effect
+      const cardEl = cardRef.current;
+      if (cardEl) {
+        cardEl.addEventListener("mouseenter", () => {
+          gsap.to(cardEl, { y: -6, duration: 0.3, ease: "power2.out" });
+        });
+        cardEl.addEventListener("mouseleave", () => {
+          gsap.to(cardEl, { y: 0, duration: 0.3, ease: "power2.out" });
+        });
+      }
     }, heroRef);
     return () => ctx.revert();
   }, [reduced]);
@@ -30,61 +123,78 @@ export function PricingHero() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen overflow-hidden bg-[#050816]"
+      className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-[#050816] pt-24 sm:pt-28 lg:pt-36"
     >
-      <div className="absolute inset-0">
-        {/* Cinematic atmospheric layer */}
-        <AtmosphericLayer variant="subtle" reducedMotion={reduced} />
-        {!reduced && (
-          <div className="absolute inset-0">
-            <StudioEnvironment
-              reduced={reduced}
-              className="!absolute !inset-0"
-              cameraPosition={[0, 0.5, 5]}
-              cameraFov={45}
-            />
-          </div>
-        )}
+      {/* Subtle background orbs */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute left-0 top-1/4 h-[500px] w-[500px] rounded-full bg-[rgba(56,189,248,0.08)] blur-[120px]" />
+        <div className="absolute left-1/3 top-1/2 h-[300px] w-[300px] rounded-full bg-[rgba(99,102,241,0.06)] blur-[100px]" />
+        <div className="absolute right-0 bottom-1/4 h-[400px] w-[400px] rounded-full bg-[rgba(139,92,246,0.08)] blur-[120px]" />
       </div>
 
-      <div className="relative z-10 flex min-h-screen items-center">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl py-12 sm:py-16 lg:py-0">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-[60px]">
+          {/* LEFT SIDE - 55% */}
+          <div className="flex flex-col justify-center">
+            {/* Badge */}
             <div
-              ref={eyebrowRef}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 opacity-0"
+              ref={badgeRef}
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white/80 opacity-0 mb-6"
             >
-              <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
-              Investment-ready packages
+              <span className="badge-glow h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
+              Premium Digital Investment
             </div>
 
-            <h1
-              ref={titleRef}
-              className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl opacity-0"
+            {/* Micro Label */}
+            <div
+              ref={microLabelRef}
+              className="mt-3 text-xs font-medium uppercase tracking-[0.25em] text-white/50 opacity-0"
             >
-              <span className="text-white">Premium scope.</span>
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4]">
-                Predictable outcomes.
+              Transparent Pricing Framework
+            </div>
+
+            {/* Headline */}
+            <h1 className="mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <span ref={titleLine1Ref} className="block opacity-0">
+                Premium Websites.
+              </span>
+              <span ref={titleLine2Ref} className="block bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 opacity-0">
+                Built For Growth.
               </span>
             </h1>
 
+            {/* Description */}
             <p
-              ref={subtitleRef}
-              className="mt-6 max-w-xl text-base leading-7 text-white/70 sm:text-lg opacity-0"
+              ref={descriptionRef}
+              className="mt-6 max-w-[600px] text-base leading-[1.8] text-white/80 opacity-0 sm:text-lg"
             >
-              Transparent pricing packages engineered for businesses that demand
-              premium digital experiences. Every investment is crafted to convert
-              visitors into clients and build lasting brand impressions.
+              Every package is engineered around business outcomes—not just pages and features. We combine premium design, conversion-focused strategy, and scalable engineering to help businesses grow with confidence.
             </p>
 
+            {/* Trust Indicators - compact 2-column wrapping */}
+            <div
+              ref={trustRef}
+              className="mt-6 grid max-w-lg grid-cols-2 gap-2 opacity-0"
+            >
+              {trustIndicators.map((indicator, index) => (
+                <div
+                  key={index}
+                  className="group flex w-fit items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-1.5 transition-all duration-300 hover:border-[#38BDF8]/30 hover:bg-white/[0.04] hover:shadow-[0_0_12px_rgba(56,189,248,0.08)]"
+                >
+                  <span className="text-sm text-[#38BDF8]">✓</span>
+                  <span className="whitespace-nowrap text-sm text-white/70">{indicator.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Buttons */}
             <div
               ref={ctaRef}
-              className="mt-8 flex flex-wrap gap-4 opacity-0"
+              className="mt-6 flex flex-wrap gap-3 opacity-0"
             >
               <a
                 href="/custom-quote"
-                className="group relative inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-[#38BDF8]/30 hover:bg-white/10 hover:shadow-[0_0_25px_rgba(56,189,248,0.18)] hover:scale-[1.02] active:scale-[0.98]"
+                className="group relative inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#38BDF8] via-[#6366F1] to-[#8B5CF6] px-6 py-3 text-sm font-semibold text-white shadow-[0_0_30px_rgba(56,189,248,0.3)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_45px_rgba(56,189,248,0.4)] active:scale-[0.98]"
               >
                 <span>Start Your Project</span>
                 <svg
@@ -103,22 +213,106 @@ export function PricingHero() {
               </a>
               <a
                 href="#pricing-cards"
-                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#38BDF8]/20 via-[#8B5CF6]/20 to-[#06B6D4]/20 px-6 py-3 text-sm font-medium text-white shadow-[0_0_25px_rgba(56,189,248,0.15)] transition-all duration-300 hover:from-[#38BDF8]/30 hover:via-[#8B5CF6]/30 hover:to-[#06B6D4]/30 hover:shadow-[0_0_35px_rgba(56,189,248,0.25)] hover:scale-[1.02] active:scale-[0.98]"
+                className="group relative inline-flex items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/5 px-6 py-3 text-sm font-medium text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition-all duration-300 hover:-translate-y-1 hover:border-[#38BDF8]/30 hover:bg-white/10 active:scale-[0.98]"
               >
-                View Packages
+                <span className="relative z-10">Explore Packages</span>
+                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
               </a>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-        <div className="flex flex-col items-center gap-2 text-white/40">
-          <span className="text-xs uppercase tracking-[0.2em]">
-            Scroll to explore
-          </span>
-          <div className="h-8 w-5 rounded-full border border-white/20 p-1">
-            <div className="h-1.5 w-1.5 rounded-full bg-white/60 animate-bounce" />
+            {/* Client Credibility Strip */}
+            <div
+              ref={credibilityRef}
+              className="mt-4 opacity-0"
+            >
+              <p className="text-xs text-white/40">
+                Trusted by: <span className="text-white/50">Startups</span> • <span className="text-white/50">Local Businesses</span> • <span className="text-white/50">Wedding Planners</span> • <span className="text-white/50">Coaching Institutes</span> • <span className="text-white/50">Personal Brands</span>
+              </p>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE - Premium Glass Card - 45% */}
+          <div className="relative hidden lg:block mt-8 lg:mt-12">
+            <div
+              ref={cardRef}
+              className="group relative rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-500 hover:-translate-y-2 hover:border-[#38BDF8]/20 hover:bg-white/[0.05] hover:shadow-[0_0_60px_rgba(56,189,248,0.1)] opacity-0"
+              style={{
+                background: "linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(139,92,246,0.08) 100%), rgba(255,255,255,0.02)",
+              }}
+            >
+              <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-[#38BDF8]/10 blur-[80px]" />
+              <div className="absolute -bottom-24 -left-24 h-44 w-44 rounded-full bg-[#8B5CF6]/10 blur-[70px]" />
+
+              <div className="relative p-8">
+                {/* Card Header */}
+                <div className="mb-6">
+                  <h3 className="text-3xl font-semibold text-white">
+                    Investment Philosophy
+                  </h3>
+                  <div className="mt-2 h-0.5 w-16 rounded-full bg-gradient-to-r from-cyan-400 to-violet-500" />
+                  <p className="mt-4 text-sm leading-relaxed text-white/60">
+                    We build pricing packages around business outcomes, performance, and long-term growth rather than unnecessary features.
+                  </p>
+                </div>
+
+                {/* Features List */}
+                <ul className="space-y-4">
+                  {philosophyFeatures.map((feature, index) => (
+                    <li
+                      key={index}
+                      ref={(el) => { cardFeaturesRef.current[index] = el; }}
+                      className="flex items-center gap-3 text-sm text-white/70 transition-all duration-300 hover:text-white/90"
+                    >
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r from-[#38BDF8]/20 to-[#8B5CF6]/20 text-xs text-[#38BDF8]">✓</span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Divider */}
+                <div className="my-6 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+                {/* Metrics Row */}
+                <div ref={metricsRef} className="grid grid-cols-3 gap-4">
+                  {metrics.map((metric, index) => (
+                    <div key={index} className="text-center">
+                      <p className="text-2xl font-semibold text-white">{metric.value}</p>
+                      <p className="mt-1 text-xs text-white/50">{metric.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Floating rupee icon - top right corner */}
+              <div
+                ref={rupeeIconRef}
+                className="absolute h-16 w-16 rounded-2xl border border-white/10 bg-white/[0.05] backdrop-blur-[20px]"
+                style={{
+                  top: "-22px",
+                  right: "-22px",
+                  opacity: 0.9,
+                }}
+              >
+                <div className="flex h-full items-center justify-center">
+                  <span className="text-2xl font-bold text-white/30">₹</span>
+                </div>
+              </div>
+
+              {/* Floating star icon - bottom left corner */}
+              <div
+                ref={starIconRef}
+                className="absolute h-[52px] w-[52px] rounded-xl border border-white/10 bg-white/[0.05] backdrop-blur-[20px]"
+                style={{
+                  bottom: "24px",
+                  left: "-22px",
+                  opacity: 0.75,
+                }}
+              >
+                <div className="flex h-full items-center justify-center">
+                  <span className="text-lg font-bold text-white/20">★</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

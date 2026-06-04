@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { LenisProvider } from "@/components/scroll/LenisProvider";
 import { CinematicMotionProvider } from "@/components/scroll/CinematicMotionProvider";
+
 import { PageTransitionProvider } from "@/components/scroll/PageTransitionProvider";
 import { OrganizationSchemaMarkup, WebSiteSchemaMarkup, LocalBusinessSchemaMarkup } from "@/components/seo/SchemaMarkup";
 
@@ -98,6 +98,9 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// Google Analytics placeholder - replace G-XXXXXXXXXX with actual ID
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -112,14 +115,26 @@ export default function RootLayout({
         <OrganizationSchemaMarkup />
         <WebSiteSchemaMarkup />
         <LocalBusinessSchemaMarkup />
+        {GA_ID && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+`,
+              }}
+            />
+          </>
+        )}
       </head>
       <body className="min-h-full flex flex-col">
-        <LenisProvider>
-          <CinematicMotionProvider />
-          <PageTransitionProvider>{children}</PageTransitionProvider>
-        </LenisProvider>
+        <CinematicMotionProvider />
+        <PageTransitionProvider>{children}</PageTransitionProvider>
       </body>
-
     </html>
   );
 }

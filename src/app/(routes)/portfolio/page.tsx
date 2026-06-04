@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { PortfolioSection } from "@/components/sections/portfolio/PortfolioSection";
 import { Navbar } from "@/components/layout/Navbar";
 import { CustomCursor } from "@/components/sections/cursor/CustomCursor";
+import { FooterSection } from "@/components/sections/footer/FooterSection";
+
 
 // Force dynamic rendering to prevent SSR issues with client components
 export const dynamic = "force-dynamic";
@@ -39,6 +41,7 @@ export default function PortfolioPage() {
       <Navbar />
       <CustomCursor />
       <PortfolioSection />
+      <FooterSection />
     </div>
   );
 }

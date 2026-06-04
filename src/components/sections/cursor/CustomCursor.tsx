@@ -42,7 +42,7 @@ function getElementPriority(el: Element): number {
   return 0.5;
 }
 
-export function CustomCursor() {
+export function CustomCursor({ hidden = false }: { hidden?: boolean }) {
   const isTouch = useIsTouchDevice();
   const isMobile = useIsMobile();
 
@@ -55,7 +55,6 @@ export function CustomCursor() {
   });
   const rafRef = useRef<number | null>(null);
   const interactiveElsRef = useRef<Element[]>([]);
-  const currentMagneticRef = useRef<Element | null>(null);
   const glowIntensityRef = useRef(1);
 
   // Cursor size state for depth reactions
@@ -238,7 +237,6 @@ export function CustomCursor() {
       if (!target || !(target instanceof Element)) return;
 
       const priority = getElementPriority(target);
-      const baseSize = 18;
       const hoverSize = 24 + priority * 8; // 24-32px based on priority
 
       setCursorSize({ width: hoverSize, height: hoverSize });
@@ -285,7 +283,8 @@ export function CustomCursor() {
     };
   }, [isTouch, isMobile, scanInteractiveElements]);
 
-  if (isTouch || isMobile) return null;
+  if (hidden || isTouch || isMobile) return null;
+
 
   return (
     <div

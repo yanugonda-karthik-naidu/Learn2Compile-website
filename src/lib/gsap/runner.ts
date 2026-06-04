@@ -14,9 +14,24 @@ export type AnimateType =
   | "blur-reveal";
 
 export function initDataAttributeAnimations(root: ParentNode = document) {
-
   if (typeof window === "undefined") return;
   if (prefersReducedMotion()) return;
+
+  // Idempotency guard: prevent duplicate ScrollTrigger creation when this is called multiple times.
+  // This is critical for scroll performance.
+  const marker = "_l2cDataAnimateInitialized";
+  const w = window as unknown as Record<string, unknown>;
+  if (w[marker]) return;
+  w[marker] = true;
+
+  // Ensure a clean ScrollTrigger state on first init.
+  // This prevents edge cases where a previous init left stale triggers.
+  try {
+    ScrollTrigger.getAll().forEach((t) => t.kill());
+  } catch {
+    // no-op
+  }
+
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -27,6 +42,7 @@ export function initDataAttributeAnimations(root: ParentNode = document) {
     if (!raw) continue;
 
     const type = raw as AnimateType;
+
 
     const durationVal = el.getAttribute("data-duration");
     const delayVal = el.getAttribute("data-delay");
@@ -47,8 +63,10 @@ export function initDataAttributeAnimations(root: ParentNode = document) {
       const yFrom = isSubtle ? motion.reveal.y.subtle : motion.reveal.y.normal;
       const staggerVal = (isSubtle ? motion.reveal.stagger.fast : motion.reveal.stagger.normal) + 0.02; // Cinematic breathing room
 
+      // Keep stagger mode GPU-light: avoid blur filters here.
       gsap.set(items, { opacity: 0, y: yFrom, scale: 0.985 });
       gsap.to(items, {
+
         opacity: 1,
         y: 0,
         scale: 1,
@@ -56,6 +74,7 @@ export function initDataAttributeAnimations(root: ParentNode = document) {
         ease: easing.outExpo,
         delay: delayNum,
         stagger: { each: staggerVal, ease: "power2.out" }, // Cinematic stagger with eased rhythm
+        // Attach a single ScrollTrigger for the whole stagger container.
         scrollTrigger: {
           trigger: el,
           start: motion.reveal.start,
@@ -63,6 +82,7 @@ export function initDataAttributeAnimations(root: ParentNode = document) {
           once: true,
         },
       });
+
 
       continue;
     }
@@ -84,7 +104,10 @@ export function initDataAttributeAnimations(root: ParentNode = document) {
       baseFrom.y = 0;
       baseFrom.opacity = 0;
     } else if (type === "blur-reveal") {
-      baseFrom.filter = "blur(6px)";
+      // Lower blur intensity to reduce GPU cost during scrolling/reveals.
+      // Mobile-friendly: avoid large blurs.
+      baseFrom.filter = "blur(3px)";
+
     } else {
       // fade-up default
     }
@@ -110,6 +133,7 @@ export function initDataAttributeAnimations(root: ParentNode = document) {
     };
 
     gsap.to(el, toVars);
+
 
   }
 }

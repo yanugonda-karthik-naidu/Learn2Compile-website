@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
+import ScrollTrigger from "gsap/ScrollTrigger";
 
 type Metric = {
   label: string;
@@ -63,15 +64,16 @@ function MetricCard({
   return (
     <div
       ref={cardRef}
-      className="rounded-2xl border border-white/10 bg-white/5 p-5"
+      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 transition-all duration-500 hover:-translate-y-2 hover:border-[#38BDF8]/30 hover:bg-white/[0.06] hover:shadow-[0_0_50px_rgba(56,189,248,0.08)]"
     >
-      <div className="text-2xl font-semibold text-white" aria-label={metric.label}>
+      <div className="absolute top-0 left-0 h-[2px] w-0 bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#EC4899] transition-all duration-500 group-hover:w-full" />
+      <div className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6]" aria-label={metric.label}>
         {formatMetricValue(renderedValue, {
           prefix: metric.prefix,
           suffix: metric.suffix,
         })}
       </div>
-      <div className="mt-1 text-sm text-white/70">{metric.label}</div>
+      <div className="mt-2 text-sm text-white/70">{metric.label}</div>
     </div>
   );
 }
@@ -111,6 +113,10 @@ const industries = [
   "Local Businesses",
   "Creators",
   "Personal Brands",
+  "Beauty & Fashion",
+  "Health & Wellness",
+  "Education",
+  "Custome Solutions",
 ];
 
 function usePrefersReducedMotion() {
@@ -137,8 +143,8 @@ export function AboutMetricsSection() {
 
   const metrics: Metric[] = useMemo(
     () => [
-      { label: "Projects Completed", value: 120, suffix: "+" },
-      { label: "Happy Clients", value: 180, suffix: "+" },
+      { label: "Projects Delivered", value: 10, suffix: "+" },
+      { label: "Happy Clients", value: 10, suffix: "+" },
       { label: "Client Satisfaction", value: 98, suffix: "%" },
       { label: "Mobile Responsive", value: 100, suffix: "%" },
       { label: "Support Availability", value: 24, suffix: "/7" },
@@ -162,37 +168,39 @@ export function AboutMetricsSection() {
     if (!el) return;
     if (hasStartedRef.current) return;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.some((e) => e.isIntersecting);
-        if (!hit) return;
+    gsap.registerPlugin(ScrollTrigger);
 
-        hasStartedRef.current = true;
-        io.disconnect();
+    const durationMs = 1050;
 
-        const start = performance.now();
-        const durationMs = 1050;
+    const animateNumbers = () => {
+      if (hasStartedRef.current) return;
+      hasStartedRef.current = true;
 
-        const tick = (now: number) => {
-          const t = Math.min(1, (now - start) / durationMs);
-          const eased = 1 - Math.pow(1 - t, 3);
+      const start = performance.now();
 
-          const next = metrics.map((m) => m.value * eased);
-          setRenderedValues(next);
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / durationMs);
+        const eased = 1 - Math.pow(1 - t, 3);
 
-          if (t < 1) requestAnimationFrame(tick);
-        };
+        const next = metrics.map((m) => m.value * eased);
+        setRenderedValues(next);
 
-        requestAnimationFrame(tick);
-      },
-      {
-        root: null,
-        threshold: 0.35,
-      }
-    );
+        if (t < 1) requestAnimationFrame(tick);
+      };
 
-    io.observe(el);
-    return () => io.disconnect();
+      requestAnimationFrame(tick);
+    };
+
+    const st = ScrollTrigger.create({
+      trigger: el,
+      start: "top 80%",
+      once: true,
+      onEnter: animateNumbers,
+    });
+
+    return () => {
+      st.kill();
+    };
   }, [metrics, reduced]);
 
   useEffect(() => {
@@ -218,7 +226,7 @@ export function AboutMetricsSection() {
   }, [reduced]);
 
   return (
-    <section ref={sectionRef} className="relative bg-[#050816] py-24">
+    <section ref={sectionRef} className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_30%,rgba(56,189,248,0.06),transparent_50%)]" />
 
       <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6">
@@ -226,16 +234,16 @@ export function AboutMetricsSection() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
               <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
-              Proof of delivery
+              Results & Impact
             </div>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-              <span className="text-white">Crafted for </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6]">Indian Businesses</span>
+              <span className="text-white">Built For Businesses </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] to-[#8B5CF6]">That Want Results</span>
             </h2>
           </div>
 
           <p className="max-w-xl text-sm leading-6 text-white/70">
-            Learn2Compile helps wedding planners, local businesses, restaurants, and coaching brands launch premium websites that look cinematic — and convert.
+            From local businesses and coaching institutes to startups and service brands, we create websites that combine premium design, modern technology, and measurable business outcomes.
           </p>
         </div>
 
@@ -250,12 +258,12 @@ export function AboutMetricsSection() {
           ))}
         </div>
 
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-6">
+        <div className="mt-16 rounded-3xl border border-white/10 bg-white/5 p-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="text-sm font-semibold text-white">Industries we serve</div>
+              <div className="text-sm font-semibold text-white">Industries We Specialize In</div>
               <div className="mt-1 text-xs text-white/70">
-                Built with business context — so clients feel understood.
+                Purpose-built solutions designed around how each industry attracts, converts, and retains customers.
               </div>
             </div>
           </div>
@@ -264,7 +272,7 @@ export function AboutMetricsSection() {
             {industries.map((name, index) => (
               <div
                 key={name}
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80"
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/80 transition-all duration-300 hover:border-[#38BDF8]/40 hover:bg-[#38BDF8]/10 hover:text-white hover:-translate-y-1"
                 ref={(el) => {
                   if (!el || reduced) return;
                   gsap.fromTo(
@@ -291,7 +299,7 @@ export function AboutMetricsSection() {
           </div>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-16">
           <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-sm font-semibold text-white">Why Learn2Compile</div>
@@ -305,7 +313,7 @@ export function AboutMetricsSection() {
             {whyChoose.map((x, index) => (
               <div
                 key={x.title}
-                className="group rounded-2xl border border-white/10 bg-white/5 p-5 transition-colors hover:border-white/20"
+                className="group relative rounded-2xl border border-white/10 bg-white/5 p-5 transition-all duration-500 hover:-translate-y-2 hover:border-[#8B5CF6]/25 hover:bg-white/[0.05] hover:shadow-[0_0_45px_rgba(139,92,246,0.08)]"
                 ref={(el) => {
                   if (!el || reduced) return;
                   gsap.fromTo(
@@ -326,20 +334,30 @@ export function AboutMetricsSection() {
                   );
                 }}
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ background: 'radial-gradient(circle at top right, rgba(56,189,248,0.08), transparent 60%)' }} />
+                <div className="relative z-10 flex items-start justify-between gap-4">
                   <div>
                     <div className="text-sm font-semibold text-white">{x.title}</div>
                     <div className="mt-2 text-xs leading-relaxed text-white/70">{x.desc}</div>
                   </div>
 
-                  <div className="mt-0.5 h-8 w-8 shrink-0 rounded-xl border border-white/10 bg-white/5 p-2 transition-transform group-hover:scale-[1.03]">
+                  <div className="mt-0.5 h-8 w-8 shrink-0 rounded-xl border border-white/10 bg-gradient-to-br from-[#38BDF8]/20 to-[#8B5CF6]/20 p-2 shadow-[0_0_20px_rgba(56,189,248,0.15)] transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
                     <span className="block h-full w-full rounded-lg bg-[#38BDF8]/20 shadow-[0_0_18px_rgba(56,189,248,0.35)]" />
                   </div>
                 </div>
 
-                <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                <div className="relative z-10 mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="mt-16 rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
+          <div className="mx-auto max-w-2xl">
+            <h3 className="text-xl font-semibold text-white">Trusted By Growing Businesses Across India</h3>
+            <p className="mt-3 text-sm leading-relaxed text-white/70">
+              Every project is built with a balance of premium design, technical excellence, and business-focused strategy to ensure long-term success.
+            </p>
           </div>
         </div>
       </div>

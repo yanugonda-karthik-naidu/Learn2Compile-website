@@ -2,49 +2,10 @@
 import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useCinematicButton } from "@/hooks/useCinematicButton";
 
 // Register plugin only on client side
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
-}
-
-function CinematicCTA({
-  href,
-  children,
-  variant = "primary",
-  className = "",
-}: {
-  href: string;
-  children: React.ReactNode;
-  variant?: "primary" | "secondary";
-  className?: string;
-}) {
-  const { onMouseEnter, onMouseLeave, onMouseDown, onMouseUp, onMouseMove, containerRef } =
-    useCinematicButton({
-      scaleStrength: variant === "primary" ? 1.03 : 1.02,
-      glowStrength: variant === "primary" ? 0.3 : 0.2,
-      glowColor:
-        variant === "primary"
-          ? "rgba(56,189,248,0.3)"
-          : "rgba(139,92,246,0.2)",
-      anticipationDelay: 0.08,
-    });
-
-  return (
-    <a
-      ref={containerRef as React.RefObject<HTMLAnchorElement>}
-      href={href}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
-      onMouseMove={onMouseMove}
-      className={className}
-    >
-      {children}
-    </a>
-  );
 }
 
 export function PortfolioCTASection() {
@@ -60,7 +21,7 @@ export function PortfolioCTASection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative bg-[#050816] py-24">
+    <section ref={sectionRef} className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
       {/* Balanced glow positioning for PortfolioCTA */}
       <div className="absolute inset-0 bg-[radial-gradient(800px_circle_at_50%_50%,rgba(56,189,248,0.12),transparent_50%),radial-gradient(600px_circle_at_30%_30%,rgba(139,92,246,0.08),transparent_50%)]" />
       <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -77,25 +38,23 @@ export function PortfolioCTASection() {
             Let&apos;s transform your business vision into a stunning digital reality. From concept to launch, we craft experiences that captivate and convert.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <CinematicCTA
+            <a
               href="/custom-quote"
-              variant="primary"
               className="group inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] px-6 py-3.5 text-base font-medium text-white shadow-[0_0_35px_rgba(56,189,248,0.25)] transition-all duration-300 hover:shadow-[0_0_50px_rgba(56,189,248,0.35)] active:scale-[0.98]"
             >
               <span>Get Custom Quote</span>
               <svg className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-            </CinematicCTA>
-            <CinematicCTA
+            </a>
+            <a
               href="/contact"
-              variant="secondary"
               className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-3.5 text-base font-medium text-white transition-all duration-300 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_0_25px_rgba(56,189,248,0.18)] active:scale-[0.98]"
             >
               Contact Us
-            </CinematicCTA>
+            </a>
           </div>
           <div className="mt-12 grid grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-white">50+</div>
+              <div className="text-3xl font-bold text-white">10+</div>
               <div className="text-sm text-white/50">Projects Delivered</div>
             </div>
             <div>

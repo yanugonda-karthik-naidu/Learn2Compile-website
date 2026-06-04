@@ -112,14 +112,13 @@ export function AboutCTASection() {
     );
   }, [reduced]);
 
-  const whatsappNumber = useMemo(() => process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "", []);
-  const whatsappHref = useMemo(
-    () => (whatsappNumber ? `https://wa.me/${whatsappNumber}` : "#"),
-    [whatsappNumber]
-  );
+  const whatsappNumber =process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "917793922519";
+  const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+    "Hi Learn2Compile, I would like to discuss a website project."
+  )}`;
 
   return (
-    <section ref={sectionRef} className="relative bg-[#050816] py-24">
+    <section ref={sectionRef} className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
       <div className="absolute inset-0 overflow-hidden">
         <div
           className="absolute inset-0"

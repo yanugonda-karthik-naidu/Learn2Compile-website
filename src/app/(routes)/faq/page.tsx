@@ -48,7 +48,7 @@ export default function FaqPage() {
 
           <main>
             <FaqPageContent />
-            <TrustSection />
+            {/* <TrustSection /> */}
             <ContactSection />
           </main>
 

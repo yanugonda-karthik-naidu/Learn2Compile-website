@@ -7,15 +7,15 @@ export { PricingCTA } from "./PricingCTA";
 
 // Backwards compatibility wrapper - includes key sections
 import { PricingCards } from "./PricingCards";
-import { PricingConfigurator } from "./PricingConfigurator";
 import { PricingValue } from "./PricingValue";
 import { PricingCTA } from "./PricingCTA";
+import { QuoteConfigurator } from "../custom-quote";
 
 export function PricingSection() {
   return (
     <div className="flex flex-col gap-0">
       <PricingCards />
-      <PricingConfigurator />
+      <QuoteConfigurator />
       <PricingValue />
       <PricingCTA />
     </div>

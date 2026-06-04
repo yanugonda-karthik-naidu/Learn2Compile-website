@@ -1,104 +1,97 @@
 "use client";
 
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 
-type BusinessType = "Landing" | "Business" | "E-Commerce" | "Custom";
+type BusinessType = "Starter" | "Business" | "Premium";
+// Keep animation/tier UI for consistency with other pricing components.
 type AnimationTier = "Basic" | "Premium" | "Cinematic";
-type Timeline = "Express" | "Standard" | "Flexible";
-type Maintenance = "None" | "Basic" | "Premium";
 
 const businessTypeCosts: Record<BusinessType, number> = {
-  Landing: 650,
-  Business: 850,
-  "E-Commerce": 1400,
-  Custom: 1200,
+  Starter: 3999,
+  Business: 8999,
+  Premium: 14999,
+};
+
+const includedPages: Record<BusinessType, number> = {
+  Starter: 3,
+  Business: 8,
+  Premium: 15,
+};
+
+const deliveryTimes: Record<BusinessType, string> = {
+  Starter: "2-3 Days",
+  Business: "5-6 Days",
+  Premium: "14–21 Days",
 };
 
 const animationTierCosts: Record<AnimationTier, number> = {
   Basic: 0,
-  Premium: 450,
-  Cinematic: 850,
+  Premium: 0,
+  Cinematic: 0,
 };
+
 
 const featureOptions = [
-  { key: "seo", label: "SEO optimization", cost: 210 },
-  { key: "forms", label: "Interactive forms", cost: 150 },
-  { key: "cms", label: "CMS-ready structure", cost: 240 },
-  { key: "analytics", label: "Analytics integration", cost: 120 },
-  { key: "perf", label: "Performance tuning", cost: 190 },
-] as const;
-
-const maintenanceCosts: Record<Maintenance, number> = {
-  None: 0,
-  Basic: 150,
-  Premium: 350,
-};
-
-const timelineMultipliers: Record<Timeline, number> = {
-  Express: 1.15,
-  Standard: 1.0,
-  Flexible: 0.9,
-};
+  {
+    key: "seo",
+    label: "Advanced SEO Optimization",
+    cost: 1000,
+  },
+  {
+    key: "booking",
+    label: "Booking / Appointment System",
+    cost: 1500,
+  },
+  {
+    key: "blog",
+    label: "Blog Management System",
+    cost: 1500,
+  },
+  {
+    key: "multilang",
+    label: "Multi Language Support",
+    cost: 2000,
+  },
+  {
+    key: "dashboard",
+    label: "Custom Admin Dashboard",
+    cost: 3000,
+  },
+];
 
 export function PricingConfigurator() {
-  const [selectedType, setSelectedType] = useState<BusinessType>("Business");
-  const [selectedTier, setSelectedTier] = useState<AnimationTier>("Premium");
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>(["seo"]);
-  const [pages, setPages] = useState(4);
-  const [selectedTimeline, setSelectedTimeline] = useState<Timeline>("Standard");
-  const [selectedMaintenance, setSelectedMaintenance] = useState<Maintenance>("Basic");
+  const [selectedType, setSelectedType] =useState<BusinessType>("Business");  const [selectedTier, setSelectedTier] = useState<AnimationTier>("Premium");
+  const [selectedFeatures, setSelectedFeatures] =useState<string[]>([]);  
+  const [pages, setPages] = useState(8);
 
   const priceRef = useRef<HTMLDivElement>(null);
   const prevPrice = useRef<number>(0);
 
   const calculator = useMemo(() => {
     const baseCost = businessTypeCosts[selectedType];
-    const animationCost = animationTierCosts[selectedTier];
+
     const featuresCost = selectedFeatures.reduce((sum, f) => {
       const option = featureOptions.find((o) => o.key === f);
       return sum + (option?.cost ?? 0);
     }, 0);
-    const pagesCost = (pages - 1) * 180;
-    const maintenanceCost = maintenanceCosts[selectedMaintenance];
-    const timelineMultiplier = timelineMultipliers[selectedTimeline];
 
-    const rawTotal =
-      baseCost +
-      animationCost +
-      featuresCost +
-      pagesCost +
-      maintenanceCost;
-    const total = Math.round(rawTotal * timelineMultiplier * 1.12);
+    const extraPages =
+      pages > includedPages[selectedType]
+        ? (pages - includedPages[selectedType]) * 500
+        : 0;
 
-    const deliveryWeeks =
-      total < 2000
-        ? 2
-        : total < 3500
-          ? 3
-          : total < 5500
-            ? 5
-            : total < 8000
-              ? 7
-              : 9;
+    const total = baseCost + featuresCost + extraPages;
 
     return {
       total,
-      deliveryWeeks,
       baseCost,
-      animationCost,
       featuresCost,
-      pagesCost,
-      maintenanceCost,
+      extraPages,
+      delivery: deliveryTimes[selectedType],
     };
-  }, [
-    selectedType,
-    selectedTier,
-    selectedFeatures,
-    pages,
-    selectedTimeline,
-    selectedMaintenance,
-  ]);
+  }, [selectedType, selectedFeatures, pages]);
+
 
   useEffect(() => {
     if (!priceRef.current) return;
@@ -109,8 +102,7 @@ export function PricingConfigurator() {
       ease: "power2.out",
       onUpdate: () => {
         if (priceRef.current) {
-          priceRef.current.textContent = `$${Math.round(obj.val).toLocaleString()}`;
-        }
+          priceRef.current.textContent =`₹${Math.round(obj.val).toLocaleString("en-IN")}`;        }
       },
     });
     prevPrice.current = calculator.total;
@@ -120,11 +112,11 @@ export function PricingConfigurator() {
     setSelectedFeatures((prev) =>
       prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]
     );
-  };
+  }; 
 
   return (
-    <section className="relative bg-[#050816] py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {/* Section header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
@@ -188,8 +180,11 @@ export function PricingConfigurator() {
             {/* Pages slider */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
               <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold text-white">Pages / modules</div>
+                <div className="text-sm font-semibold text-white">Included Pages</div>
                 <div className="text-2xl font-semibold text-[#06B6D4]">{pages}</div>
+                <div className="mt-3 rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white/60">
+                  Additional pages beyond your package are charged at ₹500/page.
+                </div>
               </div>
               <input
                 type="range"
@@ -197,6 +192,7 @@ export function PricingConfigurator() {
                 max={15}
                 value={pages}
                 onChange={(e) => setPages(Number(e.target.value))}
+                title="Select number of included pages"
                 className="mt-4 w-full appearance-none cursor-pointer rounded-lg bg-white/10 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#38BDF8] [&::-webkit-slider-thumb]:shadow-[0_0_20px_rgba(56,189,248,0.5)]"
               />
               <div className="mt-2 flex justify-between text-xs text-white/50">
@@ -207,7 +203,7 @@ export function PricingConfigurator() {
 
             {/* Features */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Premium features</div>
+              <div className="text-sm font-semibold text-white">Optional Add-ons</div>
               <div className="mt-4 space-y-2">
                 {featureOptions.map((feature) => {
                   const checked = selectedFeatures.includes(feature.key);
@@ -226,7 +222,7 @@ export function PricingConfigurator() {
                       </span>
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-white/50">
-                          +${feature.cost}
+                          +₹{feature.cost.toLocaleString("en-IN")}
                         </span>
                         <div
                           className={`flex h-5 w-5 items-center justify-center rounded-md border transition-all duration-200 ${
@@ -257,52 +253,6 @@ export function PricingConfigurator() {
                 })}
               </div>
             </div>
-
-            {/* Timeline */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Timeline priority</div>
-              <div className="mt-4 flex gap-2">
-                {(Object.keys(timelineMultipliers) as Timeline[]).map((tl) => (
-                  <button
-                    key={tl}
-                    onClick={() => setSelectedTimeline(tl)}
-                    className={`flex-1 rounded-xl border px-4 py-3 text-sm transition-all duration-200 ${
-                      selectedTimeline === tl
-                        ? "border-[#06B6D4]/50 bg-[#06B6D4]/10 text-white"
-                        : "border-white/10 bg-white/5 text-white/70 hover:border-white/20"
-                    }`}
-                  >
-                    {tl}
-                    {tl === "Express" && (
-                      <span className="ml-1 text-xs text-[#06B6D4]">+15%</span>
-                    )}
-                    {tl === "Flexible" && (
-                      <span className="ml-1 text-xs text-white/50">-10%</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Maintenance */}
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Ongoing maintenance</div>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {(Object.keys(maintenanceCosts) as Maintenance[]).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setSelectedMaintenance(m)}
-                    className={`rounded-xl border px-3 py-3 text-sm transition-all duration-200 ${
-                      selectedMaintenance === m
-                        ? "border-[#a78bfa]/50 bg-[#a78bfa]/10 text-white"
-                        : "border-white/10 bg-white/5 text-white/70 hover:border-white/20"
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Right: Live estimate */}
@@ -318,66 +268,86 @@ export function PricingConfigurator() {
 
               <div className="relative">
                 <div className="text-xs uppercase tracking-[0.25em] text-white/60">
-                  Estimated total
+                  Estimated Project Cost
                 </div>
                 <div
                   ref={priceRef}
                   className="mt-2 text-5xl font-semibold text-white"
                 >
-                  ${calculator.total.toLocaleString()}
+                  ₹{calculator.total.toLocaleString("en-IN")}
                 </div>
                 <div className="mt-2 text-sm text-white/70">
                   Estimated delivery:{" "}
                   <span className="font-semibold text-white">
-                    {calculator.deliveryWeeks} weeks
+                   {calculator.delivery} 
                   </span>
+                </div>
+                <div className="mt-6 rounded-2xl border border-[#8B5CF6]/30 bg-[#8B5CF6]/10 p-4">
+                  <div className="text-xs text-white/60">
+                    Recommended Package
+                  </div>
+
+                  <div className="mt-2 text-2xl font-semibold text-[#A78BFA]">
+                    {selectedType}
+                  </div>
                 </div>
 
                 <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
                 {/* Cost breakdown */}
-                <div className="mt-6 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/60">Base ({selectedType})</span>
-                    <span className="text-white">${calculator.baseCost.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/60">Animation ({selectedTier})</span>
+                <div className="mt-6 space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">
+                      Package ({selectedType})
+                    </span>
                     <span className="text-white">
-                      ${calculator.animationCost.toLocaleString()}
+                      ₹{calculator.baseCost.toLocaleString("en-IN")}
                     </span>
                   </div>
+
                   {calculator.featuresCost > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/60">Features</span>
+                    <div className="flex justify-between">
+                      <span className="text-white/60">
+                        Optional Add-ons
+                      </span>
                       <span className="text-white">
-                        ${calculator.featuresCost.toLocaleString()}
+                        ₹{calculator.featuresCost.toLocaleString("en-IN")}
                       </span>
                     </div>
                   )}
-                  {calculator.pagesCost > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/60">Additional pages</span>
-                      <span className="text-white">
-                        ${calculator.pagesCost.toLocaleString()}
+
+                  {calculator.extraPages > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-white/60">
+                        Additional Pages
                       </span>
-                    </div>
-                  )}
-                  {calculator.maintenanceCost > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-white/60">Maintenance</span>
                       <span className="text-white">
-                        ${calculator.maintenanceCost}/mo
+                        ₹{calculator.extraPages.toLocaleString("en-IN")}
                       </span>
                     </div>
                   )}
                 </div>
+                <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+                  <div className="font-medium text-white">
+                    Included In Every Package
+                  </div>
+
+                  <ul className="mt-3 space-y-2 text-sm text-white/70">
+                    <li>✓ Mobile Responsive Design</li>
+                    <li>✓ WhatsApp Integration</li>
+                    <li>✓ Contact Form</li>
+                    <li>✓ Basic SEO Setup</li>
+                    <li>✓ Fast Loading Website</li>
+                    <li>✓ Launch Support</li>
+                  </ul>
+                </div>
 
                 <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                <p className="mt-4 text-xs text-white/50">
-                  This estimate updates in real-time. Final scope and pricing are
-                  confirmed during our discovery call.
+                <p className="mt-5 text-xs leading-6 text-white/50">
+                  Final pricing may vary based on project requirements,
+                  custom features, third-party integrations, and scope.
+                  All prices are negotiable.
                 </p>
 
                 <div className="mt-6 flex flex-col gap-3">
@@ -385,7 +355,7 @@ export function PricingConfigurator() {
                     href="/custom-quote"
                     className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#38BDF8]/30 via-[#8B5CF6]/30 to-[#06B6D4]/30 px-6 py-3 text-sm font-medium text-white shadow-[0_0_30px_rgba(56,189,248,0.15)] transition-all duration-300 hover:from-[#38BDF8]/45 hover:via-[#8B5CF6]/45 hover:to-[#06B6D4]/45"
                   >
-                    Request quote with this estimate
+                    Start Consultation With This Scope
                     <svg
                       className="h-4 w-4"
                       fill="none"
@@ -404,7 +374,7 @@ export function PricingConfigurator() {
                     href="/contact"
                     className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:border-white/20 hover:bg-white/10"
                   >
-                    Schedule a call
+                    View All Packages
                   </a>
                 </div>
               </div>

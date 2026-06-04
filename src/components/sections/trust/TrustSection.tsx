@@ -43,11 +43,11 @@ export function TrustSection() {
 
   const metrics: Metric[] = useMemo(
     () => [
-      { label: "Projects Completed", value: 120, suffix: "+" },
-      { label: "Happy Clients", value: 180, suffix: "+" },
-      { label: "Client Satisfaction", value: 98, suffix: "%" },
-      { label: "Responsive Websites", value: 100, suffix: "%" },
-      { label: "Support Availability", value: 24, suffix: "/7" },
+      { label: "Next.js Projects", value: 10, suffix: "+" },
+      { label: "React Components", value: 200, suffix: "+" },
+      { label: "Mobile-First Sites", value: 100, suffix: "%" },
+      { label: "GSAP Animations", value: 30, suffix: "+" },
+      { label: "5-Star Reviews", value: 50, suffix: "+" },
     ],
     []
   );
@@ -148,8 +148,8 @@ export function TrustSection() {
   );
 
   return (
-    <section ref={sectionRef} className="relative bg-[#050816] py-16">
-      <div className="mx-auto max-w-6xl px-6">
+    <section ref={sectionRef} className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
         {/* Header */}
         <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>

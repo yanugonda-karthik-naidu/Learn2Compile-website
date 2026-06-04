@@ -8,20 +8,20 @@ import { FooterSection } from "@/components/sections/footer/FooterSection";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Start Your Project",
+  title: "Contact Learn2Compile",
   description:
-    "Begin your premium digital consultation. Tell us what you're building — we respond with a cinematic, engineering-ready plan within 24 hours.",
+    "Get in touch with Learn2Compile. We help Wedding Planners, Restaurants, Coaching Institutes, and Small Businesses build professional websites. Response within 24 hours.",
   keywords: [
     "contact Learn2Compile",
-    "start web project",
-    "web development consultation",
-    "India digital studio",
-    "get quote website",
+    "website inquiry",
+    "web development contact",
+    "get a website quote",
+    "business website India",
   ],
   openGraph: {
-    title: "Start Your Project | Learn2Compile",
+    title: "Contact Learn2Compile | Get Your Website Quote",
     description:
-      "Begin your premium digital consultation. We respond with a cinematic, engineering-ready plan.",
+      "Ready to start your website project? Contact Learn2Compile for a free consultation. We respond within 24 hours.",
     images: [
       {
         url: "/og-default.png",

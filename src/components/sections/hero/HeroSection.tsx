@@ -1,188 +1,62 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { StudioEnvironment } from "@/components/3d/environments/StudioEnvironment";
-import { AtmosphericLayer } from "@/components/sections/cinematic/AtmosphericLayer";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { motion } from "@/lib/gsap/config";
 import { useMotion } from "@/hooks/useMotion";
-import { useCinematicButton } from "@/hooks/useCinematicButton";
 
-function CinematicCTA({
-  href,
-  children,
-  variant = "primary",
-  className = "",
-}: {
-  href: string;
-  children: React.ReactNode;
-  variant?: "primary" | "secondary";
-  className?: string;
-}) {
-  const { onMouseEnter, onMouseLeave, onMouseDown, onMouseUp, onMouseMove, containerRef } =
-    useCinematicButton({
-      scaleStrength: variant === "primary" ? 1.04 : 1.03,
-      glowStrength: variant === "primary" ? 0.35 : 0.25,
-      glowColor:
-        variant === "primary"
-          ? "rgba(56,189,248,0.35)"
-          : "rgba(139,92,246,0.25)",
-      anticipationDelay: 0.06,
-    });
+interface MetricCardProps {
+  value: string;
+  label: string;
+}
 
-  const handleEnter = () => {
-    document.documentElement.dataset.bbCtaHover = "1";
-    onMouseEnter();
-  };
-
-  const handleLeave = () => {
-    document.documentElement.dataset.bbCtaHover = "0";
-    onMouseLeave();
-  };
-
+function MetricCard({ value, label }: MetricCardProps) {
   return (
-    <a
-      ref={containerRef as React.RefObject<HTMLAnchorElement>}
-      href={href}
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
-      onMouseMove={onMouseMove}
-      className={className}
-    >
-      {children}
-    </a>
+    <div className="group relative flex flex-col items-center justify-center rounded-[18px] border border-white/08 bg-white/04 backdrop-blur-md px-4 py-4 transition-all duration-300 hover:-translate-y-1 hover:border-white/15 hover:bg-white/06 hover:shadow-[0_0_30px_rgba(56,189,248,0.08)] sm:min-w-[140px]">
+      <span className="text-xl sm:text-2xl font-bold text-white">{value}</span>
+      <span className="mt-1 text-[10px] sm:text-xs text-white/60">{label}</span>
+    </div>
   );
 }
 
 export function HeroSection() {
   const { reduced } = useMotion();
+
   const heroRef = useRef<HTMLElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const scrollHintRef = useRef<HTMLDivElement>(null);
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
+  const metricsRef = useRef<HTMLDivElement>(null);
+  const socialProofRef = useRef<HTMLParagraphElement>(null);
 
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      const nx = (e.clientX / window.innerWidth) * 2 - 1;
-      const ny = (e.clientY / window.innerHeight) * 2 - 1;
-      setMouse({ x: nx, y: ny });
-    };
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
-
-  // Enhanced cinematic entrance with breathing rhythm
   useEffect(() => {
     if (reduced) return;
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ delay: motion.hero.delay });
+      const tl = gsap.timeline({ delay: 0.2 });
 
-      // Badge - subtle anticipation then reveal
       if (badgeRef.current) {
-        tl.fromTo(
-          badgeRef.current,
-          { y: motion.hero.badge.y, opacity: 0, scale: 0.95, filter: "blur(4px)" },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: motion.hero.badge.duration,
-            ease: motion.hero.badge.ease,
-          }
-        );
+        tl.fromTo(badgeRef.current, { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power3.out" });
       }
 
-      // Title - dramatic reveal with layered depth
-      if (titleRef.current) {
-        tl.fromTo(
-          titleRef.current,
-          {
-            y: motion.hero.title.y,
-            opacity: 0,
-            scale: 0.97,
-            filter: "blur(8px)",
-          },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: motion.hero.title.duration,
-            ease: motion.hero.title.ease,
-          },
-          motion.hero.title.overlap
-        );
+      if (headlineRef.current) {
+        tl.fromTo(headlineRef.current, { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.5");
       }
 
-      // Subtitle - measured reveal with breathing rhythm
-      if (subtitleRef.current) {
-        tl.fromTo(
-          subtitleRef.current,
-          {
-            y: motion.hero.subtitle.y,
-            opacity: 0,
-            scale: 0.98,
-            filter: "blur(4px)",
-          },
-          {
-            y: 0,
-            opacity: 1,
-            scale: 1,
-            filter: "blur(0px)",
-            duration: motion.hero.subtitle.duration,
-            ease: motion.hero.subtitle.ease,
-          },
-          motion.hero.subtitle.overlap
-        );
+      if (descriptionRef.current) {
+        tl.fromTo(descriptionRef.current, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.5");
       }
 
-      // CTA buttons - entrance with anticipation
       if (ctaRef.current) {
-        const ctaButtons = ctaRef.current.querySelectorAll("a");
-
-        // Set initial state for all CTAs
-        gsap.set(ctaButtons, {
-          opacity: 0,
-          y: motion.hero.cta.y,
-          scale: 0.95,
-        });
-
-        // Staggered reveal with breathing
-        tl.to(
-          ctaButtons,
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: motion.hero.cta.duration,
-            ease: motion.hero.cta.ease,
-            stagger: 0.12,
-          },
-          motion.hero.cta.overlap
-        );
+        tl.fromTo(ctaRef.current, { y: 25, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.5");
       }
 
-      // Scroll hint - subtle entrance
-      if (scrollHintRef.current) {
-        tl.fromTo(
-          scrollHintRef.current,
-          { y: motion.hero.scrollHint.y, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: motion.hero.scrollHint.duration,
-            ease: motion.hero.scrollHint.ease,
-          },
-          motion.hero.scrollHint.overlap
-        );
+      if (metricsRef.current) {
+        tl.fromTo(metricsRef.current, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.5");
+      }
+
+      if (socialProofRef.current) {
+        tl.fromTo(socialProofRef.current, { y: 15, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.5");
       }
     }, heroRef);
 
@@ -190,83 +64,125 @@ export function HeroSection() {
   }, [reduced]);
 
   return (
-    <section ref={heroRef} className="relative min-h-screen overflow-hidden" data-section="hero">
-      {/* Full-width 3D scene as background */}
-      <div className="absolute inset-0 z-0">
-        <StudioEnvironment
-          reduced={reduced}
-          className="!h-full !w-full"
-          cameraPosition={[0, 1.5, 5.5]}
-          cameraFov={50}
-        />
-      </div>
+    <section
+      ref={heroRef}
+      className="relative overflow-hidden bg-[#050816] flex items-center"
+      data-section="hero"
+    >
+      {/* Background Layers */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#050816] via-[#0a1628] to-[#050816]" />
 
-      {/* Atmospheric overlay */}
-      <AtmosphericLayer
-        variant="subtle"
-        mouseParallax={true}
-        mousePosition={mouse}
-        reducedMotion={reduced}
+      {/* Cyan glow behind content */}
+      <div className="absolute left-1/2 top-[25%] -translate-x-1/2 w-[700px] h-[450px] bg-[rgba(56,189,248,0.12)] blur-[150px] rounded-full pointer-events-none" />
+
+      {/* Purple glow */}
+      <div className="absolute left-1/2 top-[60%] -translate-x-1/2 w-[600px] h-[400px] bg-[rgba(139,92,246,0.08)] blur-[160px] rounded-full pointer-events-none" />
+
+      {/* Subtle grid */}
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: "70px 70px",
+        }}
       />
 
-      {/* Content overlay */}
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl py-20">
+      <div className="relative z-10 mx-auto w-full max-w-[1200px] px-4 sm:px-6 lg:px-8">
+        {/* Centered content container */}
+        <div className="flex flex-col items-center text-center max-w-[850px] mx-auto pt-[120px] pb-[90px] md:pt-[100px] md:pb-[75px] sm:pt-[80px] sm:pb-[60px]">
+
+          {/* Premium Badge */}
           <div
             ref={badgeRef}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 opacity-0"
+            className="inline-flex items-center gap-2 rounded-full border border-white/08 bg-white/04 backdrop-blur-md px-4 py-2 text-sm text-white/80 opacity-0"
           >
-            <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
-            AI-powered digital studio
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-[#38BDF8] opacity-75 animate-ping" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#38BDF8]" />
+            </span>
+            Premium Web Development Studio
           </div>
 
+          {/* Main Headline */}
           <h1
-            ref={titleRef}
-            className="mt-6 text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl opacity-0"
+            ref={headlineRef}
+            className="mt-10 text-[32px] sm:text-[42px] md:text-[52px] lg:text-[58px] font-extrabold leading-[0.95] tracking-tight text-white opacity-0"
           >
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4]">
-              We Build Future-Ready
+            Premium Websites
+            <br />
+            That Turn Visitors
+            <br />
+            <span className="bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] bg-clip-text text-transparent">
+              Into Customers
             </span>
-            <span className="block">Digital Experiences</span>
           </h1>
 
+          {/* Description */}
           <p
-            ref={subtitleRef}
-            className="mt-5 max-w-xl text-pretty text-base leading-7 text-white/70 opacity-0"
+            ref={descriptionRef}
+            className="mt-10 max-w-[700px] text-lg text-white/72 leading-relaxed opacity-0 px-2"
           >
-            Premium web development engineered with cinematic motion, immersive
-            3D, and conversion-first performance—crafted for teams that move fast
-            and look unforgettable.
+            We design and develop premium websites for startups, local businesses, wedding planners, restaurants, coaching institutes, and creators. Built to increase trust, visibility, and customer conversions.
           </p>
 
-          <div ref={ctaRef} className="mt-8 flex flex-wrap gap-3 opacity-0">
-            <CinematicCTA
-              href="/custom-quote"
-              variant="primary"
-              className="group relative inline-flex items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-white shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition-all duration-300 hover:border-white/30 hover:bg-white/10 hover:shadow-[0_0_25px_rgba(56,189,248,0.18)] active:scale-[0.98]"
-            >
-              <span className="relative z-10">Start Your Project</span>
-              <span className="ml-2 relative z-10 transition group-hover:translate-x-1">→</span>
-            </CinematicCTA>
-
-            <CinematicCTA
-              href="/portfolio"
-              variant="secondary"
-              className="group inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#38BDF8]/20 via-[#8B5CF6]/20 to-[#06B6D4]/20 px-5 py-3 text-sm font-medium text-white shadow-[0_0_25px_rgba(56,189,248,0.15)] transition-all duration-300 hover:from-[#38BDF8]/30 hover:via-[#8B5CF6]/30 hover:to-[#06B6D4]/30 hover:shadow-[0_0_35px_rgba(56,189,248,0.25)] active:scale-[0.98]"
-            >
-              View Our Work
-            </CinematicCTA>
-          </div>
-
-          {/* Scroll hint indicator */}
+          {/* CTA Buttons */}
           <div
-            ref={scrollHintRef}
-            className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0"
+            ref={ctaRef}
+            className="mt-10 flex flex-col sm:flex-row gap-5 opacity-0"
           >
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-12 w-px bg-gradient-to-b from-transparent via-white/30 to-transparent" />
-            </div>
+            <a
+              href="/custom-quote"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] px-8 py-4 text-base font-semibold text-white shadow-[0_0_30px_rgba(56,189,248,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_45px_rgba(56,189,248,0.4)] hover:scale-[1.03] active:scale-[0.98]"
+            >
+              Start Your Project
+              <svg
+                className="h-5 w-5 transition-transform group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </a>
+
+            <a
+              href="/portfolio"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/04 backdrop-blur-md px-8 py-4 text-base font-semibold text-white/90 transition-all duration-300 hover:border-white/25 hover:bg-white/08 hover:-translate-y-0.5 hover:scale-[1.03] active:scale-[0.98]"
+            >
+              View Portfolio
+              <svg
+                className="h-5 w-5 transition-transform group-hover:translate-y-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </a>
           </div>
+
+          {/* Trust Metrics Row */}
+          <div
+            ref={metricsRef}
+            className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-[700px] opacity-0"
+          >
+            <MetricCard value="10+" label="Projects Delivered" />
+            <MetricCard value="98%" label="Client Satisfaction" />
+            <MetricCard value="24h" label="Response Time" />
+            <MetricCard value="100%" label="Source Code Ownership" />
+          </div>
+
+          {/* Social Proof Text */}
+          <p
+            ref={socialProofRef}
+            className="mt-10 text-sm text-white/45 opacity-0"
+          >
+            Trusted by startups, wedding planners, restaurants, coaching institutes, and local businesses across India.
+          </p>
+
         </div>
       </div>
     </section>

@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Environment, Float, PerspectiveCamera } from "@react-three/drei";
-import * as THREE from "three";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,205 +10,160 @@ import {
 } from "@/lib/validation/contactSchema";
 import { prefersReducedMotion } from "@/lib/gsap/reducedMotion";
 
-type InquiryStep = "basics" | "project" | "details" | "review";
-
-function buildWhatsAppMessage(values: Partial<ContactInquiryInput>) {
-  const lines = [
-    "Hi Learn2Compile 👋",
-    "I’d like a premium digital consultation.",
-    values.name ? `Name: ${values.name}` : null,
-    values.phone ? `Phone: ${values.phone}` : null,
-    values.email ? `Email: ${values.email}` : null,
-    values.businessType ? `Business Type: ${values.businessType}` : null,
-    values.projectType ? `Project Type: ${values.projectType}` : null,
-    values.budget ? `Budget: ${values.budget}` : null,
-    values.timeline ? `Timeline: ${values.timeline}` : null,
-    values.description
-      ? `Goals: ${values.description}`
-      : null,
-  ].filter(Boolean);
-
-  return lines.join("\n");
-}
-
 function useIsClientReducedMotion() {
-  // `prefersReducedMotion()` is deterministic for the current browser; keep state initialised without a setter effect.
   const [reduced] = useState(() => prefersReducedMotion());
   return reduced;
 }
 
+const projectTypes = [
+  { value: "business-website", label: "Business Website" },
+  { value: "wedding-planner", label: "Wedding Planner Website" },
+  { value: "restaurant", label: "Restaurant Website" },
+  { value: "coaching-institute", label: "Coaching Institute Website" },
+  { value: "startup-landing", label: "Startup Landing Page" },
+  { value: "custom", label: "Custom Website" },
+];
 
-function Hero3D({ reduced }: { reduced: boolean }) {
-  const groupRef = useRef<THREE.Group | null>(null);
-  const panelRefs = useRef<Array<THREE.Mesh | null>>([]);
+const budgetRanges = [
+  { value: "3999-8999", label: "₹3,999 – ₹8,999" },
+  { value: "8999-14999", label: "₹8,999 – ₹14,999" },
+  { value: "14999-25000", label: "₹14,999 – ₹25,000" },
+  { value: "25000+", label: "₹25,000+" },
+  { value: "not-sure", label: "Not Sure Yet" },
+];
 
+const leadSources = [
+  { value: "instagram", label: "Instagram" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "referral", label: "Referral" },
+  { value: "google", label: "Google Search" },
+  { value: "friend", label: "Friend" },
+  { value: "other", label: "Other" },
+];
 
+const contactMethods = [
+  {
+    id: "whatsapp",
+    icon: (
+      <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+      </svg>
+    ),
+    label: "Chat on WhatsApp",
+    description: "Quickest way to discuss your project.",
+    supportText: "Usually replies within minutes.",
+    href: "https://wa.me/917793922519",
+    primary: true,
+  },
+  {
+    id: "phone",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+      </svg>
+    ),
+    label: "Call Us",
+    description: "Speak directly about your requirements.",
+    supportText: "Available during business hours.",
+    href: "tel:+917793922519",
+    primary: false,
+  },
+  {
+    id: "email",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+    label: "Email Us",
+    description: "Send project details and questions.",
+    supportText: "Response within 24 hours.",
+    href: "mailto:learn2compile@gmail.com",
+    primary: false,
+  },
+];
 
-  useEffect(() => {
-    if (reduced) return;
+const processSteps = [
+  {
+    step: "01",
+    title: "Submit Inquiry",
+    description: "Fill out the form or reach us via WhatsApp.",
+  },
+  {
+    step: "02",
+    title: "Requirement Discussion",
+    description: "We discuss your needs and answer questions.",
+  },
+  {
+    step: "03",
+    title: "Proposal & Pricing",
+    description: "Receive a clear proposal with transparent pricing.",
+  },
+  {
+    step: "04",
+    title: "Development Begins",
+    description: "Once approved, we start building your website.",
+  },
+];
 
-    const els = panelRefs.current.filter((m): m is THREE.Mesh => Boolean(m));
-
-    els.forEach((mesh, idx) => {
-      gsap.fromTo(
-        mesh.scale,
-        { x: 0.2, y: 0.2, z: 0.2 },
-        {
-          x: 1,
-          y: 1,
-          z: 1,
-          duration: 1.0,
-          delay: 0.12 + idx * 0.12,
-          ease: "power3.out",
-        }
-      );
-    });
-  }, [reduced]);
-
-  return (
-    <Canvas dpr={[1, 1.4]} camera={{ position: [0, 0.6, 5], fov: 42 }}>
-      <PerspectiveCamera makeDefault position={[0, 0.6, 5]} />
-      <ambientLight intensity={0.25} />
-      <directionalLight position={[3, 4, 2]} intensity={0.95} />
-      <pointLight position={[-3, 2, 2]} intensity={0.35} color="#38BDF8" />
-      <pointLight position={[3, 2, -2]} intensity={0.25} color="#8B5CF6" />
-      <Environment preset="night" />
-
-      <group ref={groupRef}>
-        <mesh position={[0, -0.7, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[7, 7]} />
-          <meshStandardMaterial color="#07081a" metalness={0.7} roughness={0.5} />
-        </mesh>
-
-        <Float speed={1.2} floatIntensity={0.25} rotationIntensity={0.15}>
-          <mesh
-            ref={(el) => {
-              panelRefs.current[0] = el;
-            }}
-            position={[-1.2, 0.25, 0]}
-            rotation={[0, 0.25, 0]}
-          >
-            <boxGeometry args={[0.85, 1.15, 0.04]} />
-            <meshStandardMaterial
-              color="#38BDF8"
-              metalness={0.9}
-              roughness={0.2}
-              emissive="#38BDF8"
-              emissiveIntensity={reduced ? 0.1 : 0.25}
-              transparent
-              opacity={0.9}
-            />
-          </mesh>
-        </Float>
-
-        <Float speed={1.6} floatIntensity={0.35} rotationIntensity={0.2}>
-          <mesh
-            ref={(el) => {
-              panelRefs.current[1] = el;
-            }}
-            position={[0, 0.15, 0.55]}
-            rotation={[0, 0, 0]}
-          >
-            <boxGeometry args={[1.0, 1.4, 0.04]} />
-            <meshStandardMaterial
-              color="#8B5CF6"
-              metalness={0.9}
-              roughness={0.2}
-              emissive="#8B5CF6"
-              emissiveIntensity={reduced ? 0.1 : 0.22}
-              transparent
-              opacity={0.86}
-            />
-          </mesh>
-        </Float>
-
-        <Float speed={1.0} floatIntensity={0.2} rotationIntensity={0.12}>
-          <mesh
-            ref={(el) => {
-              panelRefs.current[2] = el;
-            }}
-            position={[1.15, 0.2, 0]}
-            rotation={[0, -0.22, 0]}
-          >
-            <boxGeometry args={[0.75, 0.98, 0.04]} />
-            <meshStandardMaterial
-              color="#06B6D4"
-              metalness={0.9}
-              roughness={0.2}
-              emissive="#06B6D4"
-              emissiveIntensity={reduced ? 0.1 : 0.22}
-              transparent
-              opacity={0.9}
-            />
-          </mesh>
-        </Float>
-
-        {!reduced ? (
-          <mesh position={[0, 0.35, -0.15]}>
-            <ringGeometry args={[0.35, 0.52, 40]} />
-            <meshBasicMaterial color="#38BDF8" transparent opacity={0.25} />
-          </mesh>
-        ) : null}
-      </group>
-    </Canvas>
-  );
-}
-
-function StepPill({
-  active,
-  index,
-  title,
-}: {
-  active: boolean;
-  index: number;
-  title: string;
-}) {
-  return (
-    <div
-      className={
-        active
-          ? "rounded-2xl border border-[#38BDF8]/40 bg-[#38BDF8]/10 p-3"
-          : "rounded-2xl border border-white/10 bg-white/5 p-3"
-      }
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={
-            active
-              ? "h-8 w-8 rounded-xl bg-[#38BDF8]/20 text-center leading-8 text-xs font-semibold text-[#38BDF8]"
-              : "h-8 w-8 rounded-xl bg-white/5 text-center leading-8 text-xs font-semibold text-white/70"
-          }
-        >
-          {String(index + 1).padStart(2, "0")}
-        </div>
-        <div>
-          <div className="text-sm font-semibold text-white">{title}</div>
-          <div className="mt-0.5 text-xs text-white/60">Cinematic intake step</div>
-        </div>
-      </div>
-    </div>
-  );
-}
+const trustItems = [
+  {
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+    ),
+    title: "Fast Response",
+    description: "Quick turnaround on all inquiries.",
+  },
+  {
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+    ),
+    title: "Transparent Communication",
+    description: "No hidden fees or surprises.",
+  },
+  {
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    ),
+    title: "Mobile Responsive",
+    description: "Perfect on every screen size.",
+  },
+  {
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    ),
+    title: "Ongoing Support",
+    description: "Long-term partnership beyond launch.",
+  },
+];
 
 export function ContactSection() {
   const reduced = useIsClientReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
-  const [step, setStep] = useState<InquiryStep>("basics");
   const [submitState, setSubmitState] = useState<
     | { status: "idle" }
     | { status: "loading" }
-    | { status: "success"; referenceId: string }
+    | { status: "success" }
     | { status: "error"; message: string }
   >({ status: "idle" });
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setValue,
     watch,
+    formState: { errors },
     reset,
-    trigger,
-    getValues,
   } = useForm<ContactInquiryInput>({
     resolver: zodResolver(contactInquirySchema),
     defaultValues: {
@@ -221,588 +173,403 @@ export function ContactSection() {
       businessType: "",
       projectType: "",
       budget: "",
-      timeline: "",
+      leadSource: "",
       description: "",
     },
     mode: "onBlur",
   });
 
-  const formValues = watch();
+  // Format phone with +91 prefix for Indian numbers
+  const formatPhoneNumber = (value: string): string => {
+    const digits = value.replace(/\D/g, "");
 
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "";
-  const whatsappDefault = useMemo(() => {
-    return buildWhatsAppMessage({
-      name: formValues.name,
-      phone: formValues.phone,
-      email: formValues.email,
-      businessType: formValues.businessType,
-      projectType: formValues.projectType,
-      budget: formValues.budget,
-      timeline: formValues.timeline,
-      description: formValues.description,
-    });
-  }, [formValues]);
+    // If starts with 91 and has 12+ digits, extract last 10
+    if (digits.startsWith("91") && digits.length > 10) {
+      const last10 = digits.slice(-10);
+      return `+91 ${last10}`;
+    }
 
-  const whatsappHref = useMemo(() => {
-    if (!whatsappNumber) return "#";
-    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappDefault)}`;
-  }, [whatsappDefault, whatsappNumber]);
+    // If starts with 6-9 and is 10 digits, add +91
+    if (digits.length >= 10) {
+      const last10 = digits.slice(-10);
+      return `+91 ${last10}`;
+    }
 
-  const stepTitle =
-    step === "basics"
-      ? "Your details"
-      : step === "project"
-        ? "Project context"
-        : step === "details"
-          ? "Delivery intent"
-          : "Ready to transmit";
-
-  const goalsHelper = useMemo(() => {
-    const bt = getValues("businessType");
-    const tone = bt ? `for ${bt}` : "for your business";
-    return `Describe your goals ${tone}. What should this project achieve? (leads, bookings, enquiries, credibility)`;
-  }, [formValues.businessType, formValues.projectType, getValues]);
-
-  const next = async () => {
-    const ok = await (async () => {
-      if (step === "basics")
-        return trigger(["name", "phone", "email"]);
-      if (step === "project")
-        return trigger(["businessType", "projectType"]);
-      if (step === "details")
-        return trigger(["budget", "timeline", "description"]);
-
-      return true;
-    })();
-    if (!ok) return;
-
-    setStep((s) => (s === "basics" ? "project" : s === "project" ? "details" : "review"));
+    // Otherwise just return cleaned value
+    return digits;
   };
 
-  const back = () => {
-    setStep((s) => (s === "review" ? "details" : s === "details" ? "project" : "basics"));
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setValue("phone", formatted, { shouldValidate: true });
   };
 
   const onSubmit = async (values: ContactInquiryInput) => {
-    setSubmitState({ status: "loading" });
-    try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+    // Required-field guard (keeps Zod + react-hook-form validation, but ensures WhatsApp URL is never opened with blanks)
+    const required = [
+      { key: "name" as const, label: "Name" },
+      { key: "businessType" as const, label: "Business Name" },
+      { key: "phone" as const, label: "Phone" },
+      { key: "email" as const, label: "Email" },
+      { key: "projectType" as const, label: "Website Type" },
+      { key: "budget" as const, label: "Budget Range" },
+      { key: "description" as const, label: "Project Description" },
+    ];
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.error ?? "Unable to submit. Please try again.");
-      }
+    const missing = required
+      .filter(({ key }) => {
+        const v = values[key];
+        return v === undefined || v === null || String(v).trim().length === 0;
+      })
+      .map(({ label }) => label);
 
-      const referenceId = `${Date.now()}`;
-      setSubmitState({ status: "success", referenceId });
-      reset();
-      setStep("basics");
-
-      setTimeout(() => setSubmitState({ status: "idle" }), 6000);
-    } catch (e) {
+    if (missing.length > 0) {
       setSubmitState({
         status: "error",
-        message: e instanceof Error ? e.message : "Something went wrong.",
+        message: `Please fill in: ${missing.join(", ")}.`,
       });
+      return;
     }
+
+    setSubmitState({ status: "loading" });
+
+    const whatsappNumber = "917793922519";
+    const message = `Hello Learn2Compile,\n\nName:\n${values.name}\n\nBusiness:\n${values.businessType}\n\nPhone:\n${values.phone}\n\nEmail:\n${values.email ?? ""}\n\nWebsite Type:\n${values.projectType}\n\nBudget:\n${values.budget}\n\nProject Description:\n${values.description}`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    // Success toast before redirecting
+    setSubmitState({ status: "success" });
+
+    window.open(whatsappUrl, "_blank");
+    reset();
   };
 
-  const heroRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (reduced) return;
+    if (!sectionRef.current || reduced) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        ".contact-hero-title",
-        { y: 28, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.9, ease: "power3.out" }
+        ".contact-hero-content",
+        { y: 30, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
       );
       gsap.fromTo(
-        ".contact-hero-sub",
-        { y: 22, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", delay: 0.1 }
+        ".contact-method",
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: "power3.out", stagger: 0.1 }
       );
       gsap.fromTo(
-        ".contact-hero-cta",
-        { y: 18, opacity: 0 },
+        ".contact-form-section",
+        { y: 30, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.6, ease: "power3.out", delay: 0.2 }
       );
-    }, heroRef);
+    }, sectionRef);
 
     return () => ctx.revert();
   }, [reduced]);
 
   return (
-    <section className="relative bg-[#050816] py-10 md:py-16">
-      <div ref={heroRef} className="relative mx-auto max-w-6xl px-6">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5">
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(900px_circle_at_10%_0%,rgba(56,189,248,0.18),transparent_55%),radial-gradient(700px_circle_at_85%_20%,rgba(139,92,246,0.14),transparent_50%)]" />
+    <section ref={sectionRef} className="relative bg-[#050816] py-16 sm:py-20 md:py-24 overflow-x-hidden">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_20%_30%,rgba(56,189,248,0.12),transparent_50%),radial-gradient(ellipse_at_80%_70%,rgba(139,92,246,0.10),transparent_50%)]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div ref={heroRef} className="contact-hero-content text-center mb-12 sm:mb-16">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs sm:text-sm text-white/80">
+            <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
+            Get in Touch
           </div>
 
-          <div className="relative grid gap-6 lg:grid-cols-5 lg:gap-8 p-6 md:p-8">
-            <div className="lg:col-span-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
-                <span className="h-2 w-2 rounded-full bg-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.6)]" />
-                Premium consultation
-              </div>
+          <h1 className="mt-6 text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+            <span className="text-white">Let&apos;s Build </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4]">
+              Your Website
+            </span>
+          </h1>
 
-              <h2 className="contact-hero-title mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Transmit your inquiry. Receive a cinematic execution plan.
-              </h2>
+          <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg text-white/70">
+            Ready to start your project? We usually respond within 24 hours.
+          </p>
+        </div>
 
-              <p className="contact-hero-sub mt-4 max-w-xl text-sm leading-6 text-white/70">
-                Guided intake for Indian business inquiries—fast, business-first, and
-                conversion-ready. Choose your project context, then send.
-              </p>
-
-              <div className="contact-hero-cta mt-6 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={() => setStep("basics")}
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/10"
-                >
-                  Start Your Project
-                </button>
-                <a
-                  href="/custom-quote"
-                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#38BDF8]/20 via-[#8B5CF6]/20 to-[#06B6D4]/20 px-5 py-3 text-sm font-medium text-white shadow-[0_0_30px_rgba(56,189,248,0.15)] transition hover:from-[#38BDF8]/30 hover:via-[#8B5CF6]/30 hover:to-[#06B6D4]/30"
-                >
-                  Get Custom Quote
-                </a>
-              </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-[#050816]/30 p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-white/50">Response</div>
-                  <div className="mt-2 text-sm font-semibold text-white">Within 24 hours</div>
-                  <div className="mt-1 text-xs text-white/60">Clear next steps, premium planning.</div>
+        {/* Contact Methods */}
+        <div className="contact-method mb-12 sm:mb-16">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {contactMethods.map((method) => (
+              <a
+                key={method.id}
+                href={method.href}
+                target={method.id === "whatsapp" || method.id === "email" ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className={`group relative flex flex-col items-center rounded-2xl border p-5 sm:p-6 text-center transition-all duration-300 ${
+                  method.primary
+                    ? "border-green-500/30 bg-green-500/10 hover:border-green-500/50 hover:bg-green-500/15 hover:shadow-[0_0_30px_rgba(34,197,94,0.15)]"
+                    : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10"
+                }`}
+              >
+                <div className={`mb-3 ${method.primary ? "text-green-400" : "text-white/70 group-hover:text-white"}`}>
+                  {method.icon}
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-[#050816]/30 p-4">
-                  <div className="text-xs uppercase tracking-[0.18em] text-white/50">Format</div>
-                  <div className="mt-2 text-sm font-semibold text-white">Timeline + execution scope</div>
-                  <div className="mt-1 text-xs text-white/60">Engineering-ready deliverables.</div>
+                <div className={`text-sm font-semibold ${method.primary ? "text-green-400" : "text-white"}`}>
+                  {method.label}
                 </div>
-              </div>
-            </div>
-
-            <div className="relative lg:col-span-2 rounded-3xl border border-white/10 bg-[#050816]/40 overflow-hidden">
-              <div className="absolute inset-0">
-                <Hero3D reduced={reduced} />
-              </div>
-
-              <div className="relative p-5">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs uppercase tracking-[0.18em] text-white/55">
-                      Inquiry console
-                    </div>
-                    <div className="text-xs text-[#38BDF8]">
-                      Step{" "}
-                      {step === "basics"
-                        ? "01"
-                        : step === "project"
-                          ? "02"
-                          : step === "details"
-                            ? "03"
-                            : "04"}
-                    </div>
-                  </div>
-                  <div className="mt-3 text-sm font-semibold text-white">{stepTitle}</div>
-                  <div className="mt-2 text-xs leading-5 text-white/65">
-                    Tap through the panels—your WhatsApp message updates live.
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-3">
-                    <a
-                      href={whatsappHref}
-                      target={whatsappNumber ? "_blank" : undefined}
-                      rel="noreferrer"
-                      className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-[#050816]/30 px-3 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-                    >
-                      <span className="mr-2 text-[#38BDF8]">●</span>
-                      WhatsApp
-                    </a>
-                    <div className="hidden sm:block text-xs text-white/55">
-                      {whatsappNumber ? "Prefilled" : "Set env var"}
-                    </div>
-                  </div>
+                <div className="mt-1 text-xs text-white/60">
+                  {method.description}
                 </div>
-              </div>
-            </div>
+                <div className="mt-1.5 text-xs text-white/40">
+                  {method.supportText}
+                </div>
+              </a>
+            ))}
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-5">
-          <div className="hidden lg:block lg:col-span-2">
-            <div className="space-y-3">
-              <StepPill active={step === "basics"} index={0} title="Basics" />
-              <StepPill active={step === "project"} index={1} title="Project" />
-              <StepPill active={step === "details"} index={2} title="Budget & timing" />
-              <StepPill active={step === "review"} index={3} title="Transmit" />
-            </div>
+        {/* Main Content Grid */}
+        <div className="grid gap-12 lg:grid-cols-2 lg:gap-8">
+          {/* Left: Form */}
+          <div className="contact-form-section">
+            <form
+              className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur"
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              <div className="text-lg font-semibold text-white mb-6">Send Us a Message</div>
 
-            <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-white">Consultation workflow</div>
-              <div className="mt-2 text-xs leading-5 text-white/65">
-                We don’t reply with generic forms. You’ll get scope clarity and a communication timeline.
+              <div className="space-y-5">
+                {/* Name */}
+                <label className="block">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-white/80">Name</span>
+                    <span className="text-xs text-[#38BDF8]">Required</span>
+                  </div>
+                  <input
+                    {...register("name")}
+                    placeholder="Your name"
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white placeholder-white/40 outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px]"
+                  />
+                  {errors.name && (
+                    <div className="mt-1 text-xs text-red-400">{errors.name.message}</div>
+                  )}
+                </label>
+
+                {/* Business Name */}
+                <label className="block">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-white/80">Business Name</span>
+                    <span className="text-xs text-[#38BDF8]">Required</span>
+                  </div>
+                  <input
+                    {...register("businessType")}
+                    placeholder="Your business name"
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white placeholder-white/40 outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px]"
+                  />
+                  {errors.businessType && (
+                    <div className="mt-1 text-xs text-red-400">{errors.businessType.message}</div>
+                  )}
+                </label>
+
+                {/* Phone & Email Row */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="block">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-white/80">Phone</span>
+                      <span className="text-xs text-[#38BDF8]">Required</span>
+                    </div>
+                    <input
+                      {...register("phone")}
+                      type="tel"
+                      placeholder="+91 98xxxxxx10"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white placeholder-white/40 outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px]"
+                      onChange={handlePhoneChange}
+                    />
+                    {errors.phone && (
+                      <div className="mt-1 text-xs text-red-400">{errors.phone.message}</div>
+                    )}
+                  </label>
+
+                  <label className="block">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-white/80">Email</span>
+                      <span className="text-xs text-[#38BDF8]">Required</span>
+                    </div>
+                    <input
+                      {...register("email")}
+                      type="email"
+                      placeholder="you@company.com"
+                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white placeholder-white/40 outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px]"
+                    />
+                    {errors.email && (
+                      <div className="mt-1 text-xs text-red-400">{errors.email.message}</div>
+                    )}
+                  </label>
+                </div>
+
+                {/* Project Type */}
+                <label className="block">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-white/80">Website Type Needed</span>
+                    <span className="text-xs text-[#38BDF8]">Required</span>
+                  </div>
+                  <select
+                    {...register("projectType")}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px] [&>option]:bg-[#050816]"
+                  >
+                    <option value="">Select website type...</option>
+                    {projectTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.projectType && (
+                    <div className="mt-1 text-xs text-red-400">{errors.projectType.message}</div>
+                  )}
+                </label>
+
+                {/* Budget Range */}
+                <label className="block">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-white/80">Budget Range</span>
+                    <span className="text-xs text-[#38BDF8]">Required</span>
+                  </div>
+                  <select
+                    {...register("budget")}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px] [&>option]:bg-[#050816]"
+                  >
+                    <option value="">Select budget range...</option>
+                    {budgetRanges.map((range) => (
+                      <option key={range.value} value={range.value}>
+                        {range.label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.budget && (
+                    <div className="mt-1 text-xs text-red-400">{errors.budget.message}</div>
+                  )}
+                </label>
+
+                {/* Lead Source */}
+                <label className="block">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-white/80">How did you hear about us?</span>
+                    <span className="text-xs text-white/40">Optional</span>
+                  </div>
+                  <select
+                    {...register("leadSource")}
+                    className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px] [&>option]:bg-[#050816]"
+                  >
+                    <option value="">Select an option...</option>
+                    {leadSources.map((source) => (
+                      <option key={source.value} value={source.value}>
+                        {source.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                {/* Project Description */}
+                <label className="block">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-white/80">Project Description</span>
+                    <span className="text-xs text-[#38BDF8]">Required</span>
+                  </div>
+                  <textarea
+                    {...register("description")}
+                    placeholder="Tell us about your project, goals, and any specific requirements..."
+                    rows={4}
+                    className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-white placeholder-white/40 outline-none transition focus:border-[#38BDF8]/40 focus:bg-white/[0.07] min-h-[48px]"
+                  />
+                  {errors.description && (
+                    <div className="mt-1 text-xs text-red-400">{errors.description.message}</div>
+                  )}
+                </label>
               </div>
 
-              <div className="mt-4 space-y-3">
-                {[
-                  { t: "Onboarding", d: "Confirm context + success metrics" },
-                  { t: "Communication loop", d: "Align milestones & deliverables" },
-                  { t: "Execution", d: "Engineering-ready plan for delivery" },
-                ].map((x) => (
-                  <div key={x.t} className="rounded-2xl border border-white/10 bg-[#050816]/30 p-3">
-                    <div className="text-xs font-semibold text-white">{x.t}</div>
-                    <div className="mt-1 text-xs text-white/60">{x.d}</div>
+              {/* Error Message */}
+              {submitState.status === "error" && (
+                <div className="mt-4 rounded-xl border border-red-400/20 bg-red-500/10 p-3 text-sm text-red-200">
+                  {submitState.message}
+                </div>
+              )}
+
+              {/* Success Message */}
+              {submitState.status === "success" && (
+                <div className="mt-4 rounded-xl border border-green-400/20 bg-green-500/10 p-3 text-sm text-green-200 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    Preparing your project inquiry...
+                  </div>
+                  <div className="text-green-300/70">Opening WhatsApp securely...</div>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <div className="mt-6">
+                <button
+                  type="submit"
+                  disabled={submitState.status === "loading"}
+                  className="w-full rounded-xl bg-gradient-to-r from-[#38BDF8]/30 via-[#8B5CF6]/30 to-[#06B6D4]/30 px-6 py-3.5 text-sm font-medium text-white shadow-[0_0_30px_rgba(56,189,248,0.15)] transition-all duration-300 hover:from-[#38BDF8]/45 hover:via-[#8B5CF6]/45 hover:to-[#06B6D4]/45 disabled:opacity-60"
+                >
+                  {submitState.status === "loading" ? "Sending..." : "Send Message"}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Right: What Happens Next + Trust Section */}
+          <div className="space-y-8">
+            {/* What Happens Next */}
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+              <div className="text-lg font-semibold text-white mb-6">What Happens Next</div>
+
+              <div className="space-y-4">
+                {processSteps.map((item, index) => (
+                  <div key={item.step} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#38BDF8]/30 bg-[#38BDF8]/10 text-sm font-semibold text-[#38BDF8]">
+                        {item.step}
+                      </div>
+                      {index < processSteps.length - 1 && (
+                        <div className="mt-2 h-8 w-px bg-gradient-to-b from-[#38BDF8]/30 to-transparent" />
+                      )}
+                    </div>
+                    <div className="flex-1 pb-6">
+                      <div className="text-sm font-semibold text-white">{item.title}</div>
+                      <div className="mt-0.5 text-xs text-white/60">{item.description}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Trust Section */}
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+              <div className="text-lg font-semibold text-white mb-6">Why Choose Us</div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {trustItems.map((item) => (
+                  <div
+                    key={item.title}
+                    className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-4"
+                  >
+                    <div className="text-[#38BDF8]">{item.icon}</div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">{item.title}</div>
+                      <div className="mt-0.5 text-xs text-white/60">{item.description}</div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-
-          <div className="lg:col-span-3">
-            <form
-              className="rounded-3xl border border-white/10 bg-white/5 p-5 md:p-6 backdrop-blur"
-              onSubmit={handleSubmit(onSubmit)}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-xs uppercase tracking-[0.18em] text-white/50">Guided inquiry</div>
-                  <div className="mt-2 text-lg font-semibold text-white">{stepTitle}</div>
-                  <div className="mt-1 text-xs leading-5 text-white/65">
-                    {step === "basics"
-                      ? "Tell us who to contact."
-                      : step === "project"
-                        ? "What are you building?"
-                        : step === "details"
-                          ? "How soon and how big?"
-                          : "Review and transmit."}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-white/55">Conversion mode</div>
-                  <div className="mt-2 text-xs text-[#38BDF8]">Cinematic intake</div>
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-4">
-                {step === "basics" ? (
-                  <>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="group block">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">Name</span>
-                          <span className="text-xs text-[#38BDF8] transition">Required</span>
-                        </div>
-                        <input
-                          {...register("name")}
-                          placeholder="Your name"
-                          className="mt-2 w-full rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                        />
-                        {errors.name ? (
-                          <div className="mt-1 text-xs text-red-400">{errors.name.message}</div>
-                        ) : null}
-                      </label>
-
-                      <label className="group block">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">Phone</span>
-                          <span className="text-xs text-[#38BDF8] transition">Required</span>
-                        </div>
-                        <input
-                          {...register("phone")}
-                          placeholder="+91 98xxxxxx10"
-                          inputMode="tel"
-                          className="mt-2 w-full rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                        />
-                        {errors.phone ? (
-                          <div className="mt-1 text-xs text-red-400">{errors.phone.message}</div>
-                        ) : null}
-                      </label>
-
-                      <label className="group block sm:col-span-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">Email (optional)</span>
-                          <span className="text-xs text-white/60">Optional</span>
-                        </div>
-                        <input
-                          {...register("email")}
-                          placeholder="you@company.com"
-                          inputMode="email"
-                          className="mt-2 w-full rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                        />
-                        {errors.email ? (
-                          <div className="mt-1 text-xs text-red-400">{errors.email.message}</div>
-                        ) : null}
-                      </label>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-[#050816]/30 p-4">
-                      <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-                        Premium communication
-                      </div>
-                      <div className="mt-2 text-sm font-medium text-white">
-                        We respond with clarity, not copy-paste.
-                      </div>
-                      <div className="mt-1 text-xs leading-5 text-white/65">
-                        Your WhatsApp message will include your selections as you go.
-                      </div>
-                    </div>
-                  </>
-                ) : null}
-
-                {step === "project" ? (
-                  <>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="group block sm:col-span-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">Business Type</span>
-                          <span className="text-xs text-[#38BDF8] transition">Required</span>
-                        </div>
-                        <input
-                          {...register("businessType")}
-                          placeholder="Restaurant / Wedding planner / Coaching institute / Personal brand..."
-                          className="mt-2 w-full rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                        />
-                        {errors.businessType ? (
-                          <div className="mt-1 text-xs text-red-400">
-                            {errors.businessType.message}
-                          </div>
-                        ) : null}
-                      </label>
-
-                      <label className="group block sm:col-span-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">Project Type</span>
-                          <span className="text-xs text-[#38BDF8] transition">Required</span>
-                        </div>
-                        <input
-                          {...register("projectType")}
-                          placeholder="Website / Landing page / E-commerce / Booking system..."
-                          className="mt-2 w-full rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                        />
-                        {errors.projectType ? (
-                          <div className="mt-1 text-xs text-red-400">
-                            {errors.projectType.message}
-                          </div>
-                        ) : null}
-                      </label>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-[#050816]/30 p-4">
-                      <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-                        Holographic workflow
-                      </div>
-                      <div className="mt-2 text-sm font-medium text-white">
-                        We map your context into a delivery-ready scope.
-                      </div>
-                      <div className="mt-1 text-xs leading-5 text-white/65">
-                        Next: budget & timeline so we can propose realistic sequencing.
-                      </div>
-                    </div>
-                  </>
-                ) : null}
-
-                {step === "details" ? (
-                  <>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="group block">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">Budget Range</span>
-                          <span className="text-xs text-[#38BDF8] transition">Required</span>
-                        </div>
-                        <input
-                          {...register("budget")}
-                          placeholder="₹30k–₹1L / ₹1L+ / Let’s discuss"
-                          className="mt-2 w-full rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                        />
-                        {errors.budget ? (
-                          <div className="mt-1 text-xs text-red-400">{errors.budget.message}</div>
-                        ) : null}
-                      </label>
-
-                      <label className="group block">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/60">Timeline</span>
-                          <span className="text-xs text-[#38BDF8] transition">Required</span>
-                        </div>
-                        <input
-                          {...register("timeline")}
-                          placeholder="ASAP / 2–6 weeks / This quarter"
-                          className="mt-2 w-full rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                        />
-                        {errors.timeline ? (
-                          <div className="mt-1 text-xs text-red-400">{errors.timeline.message}</div>
-                        ) : null}
-                      </label>
-                    </div>
-
-                    <label className="group block">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-white/60">Goals / Description</span>
-                        <span className="text-xs text-[#38BDF8] transition">Required</span>
-                      </div>
-                      <textarea
-                        {...register("description")}
-                        placeholder={goalsHelper}
-                        className="mt-2 min-h-[120px] w-full resize-none rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/30"
-                      />
-                      {errors.description ? (
-                        <div className="mt-1 text-xs text-red-400">{errors.description.message}</div>
-                      ) : null}
-                    </label>
-                  </>
-                ) : null}
-
-                {step === "review" ? (
-                  <>
-                    <div className="rounded-2xl border border-white/10 bg-[#050816]/30 p-4">
-                      <div className="text-xs uppercase tracking-[0.18em] text-white/50">
-                        Transmit preview
-                      </div>
-                      <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                        {[
-                          { k: "Name", v: formValues.name },
-                          { k: "Phone", v: formValues.phone },
-                          { k: "Email", v: formValues.email || "—" },
-                          { k: "Business", v: formValues.businessType },
-                          { k: "Project", v: formValues.projectType },
-                          { k: "Budget", v: formValues.budget },
-                          { k: "Timeline", v: formValues.timeline },
-                        ].map((x) => (
-                          <div
-                            key={x.k}
-                            className="rounded-2xl border border-white/10 bg-[#050816]/30 p-3"
-                          >
-                            <div className="text-xs text-white/55">{x.k}</div>
-                            <div className="mt-1 text-sm font-semibold text-white">{x.v}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-4 rounded-2xl border border-white/10 bg-[#050816]/30 p-4">
-                        <div className="text-xs text-white/55">Goals</div>
-                        <div className="mt-2 text-sm leading-6 text-white/80">{formValues.description}</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4">
-                      <div className="text-sm font-semibold text-white">Premium WhatsApp option</div>
-                      <div className="mt-1 text-xs leading-5 text-white/65">
-                        Use this if you want instant conversation. We prefill your selections.
-                      </div>
-
-                      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-                        <a
-                          href={whatsappHref}
-                          target={whatsappNumber ? "_blank" : undefined}
-                          rel="noreferrer"
-                          className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-                        >
-                          <span className="mr-2 text-[#38BDF8]">●</span>
-                          WhatsApp Inquiry
-                          <span className="ml-2 text-[#38BDF8]">→</span>
-                        </a>
-                        <div className="text-xs text-white/55">
-                          {whatsappNumber
-                            ? "Message is generated from your workflow."
-                            : "Set NEXT_PUBLIC_WHATSAPP_NUMBER to enable."}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : null}
-
-                {submitState.status === "error" ? (
-                  <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-3 text-sm text-red-200">
-                    {submitState.message}
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={back}
-                    disabled={step === "basics" || submitState.status === "loading"}
-                    className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 disabled:opacity-50"
-                  >
-                    Back
-                  </button>
-
-                  {step !== "review" ? (
-                    <button
-                      type="button"
-                      onClick={next}
-                      disabled={submitState.status === "loading"}
-                      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:border-[#38BDF8]/30 hover:bg-white/10 disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  ) : null}
-                </div>
-
-                {step === "review" ? (
-                  <button
-                    type="submit"
-                    disabled={submitState.status === "loading"}
-                    className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#38BDF8]/30 via-[#8B5CF6]/30 to-[#06B6D4]/30 px-6 py-3 text-sm font-medium text-white shadow-[0_0_30px_rgba(56,189,248,0.15)] transition hover:from-[#38BDF8]/45 hover:via-[#8B5CF6]/45 hover:to-[#06B6D4]/45 disabled:opacity-60"
-                  >
-                    {submitState.status === "loading"
-                      ? "Sending…"
-                      : submitState.status === "success"
-                        ? "Sent — we’ll reach out shortly"
-                        : "Transmit Inquiry"}
-                  </button>
-                ) : (
-                  <div className="text-xs text-white/55">
-                    {step === "details" ? "Ready when you are." : "WhatsApp updates live as you type."}
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <a
-                  href="/custom-quote"
-                  className="rounded-2xl border border-white/10 bg-[#050816]/30 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                >
-                  Book Consultation
-                </a>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const msg = buildWhatsAppMessage(getValues());
-                    if (!whatsappNumber) return;
-                    window.open(
-                      `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`,
-                      "_blank",
-                      "noopener,noreferrer"
-                    );
-                  }}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-[#38BDF8]/30 hover:bg-white/10"
-                >
-                  WhatsApp Instant
-                </button>
-              </div>
-
-              <div className="mt-3 text-center text-xs text-white/50">
-                By transmitting, you agree to receive a reply about your project.
-              </div>
-            </form>
-          </div>
         </div>
-
-        <div className="mt-12 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
     </section>
   );
 }
-
