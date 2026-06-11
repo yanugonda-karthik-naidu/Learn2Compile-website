@@ -464,6 +464,7 @@ export function FeaturedProject() {
         <div className="mt-10 sm:mt-12 md:mt-14 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-center">
           <a
             href={rankhanceUrl}
+            aria-label="Visit RankHance Website"
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#EC4899]/20 via-[#8B5CF6]/20 to-[#EC4899]/20 px-5 sm:px-6 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-white shadow-[0_0_30px_rgba(236,72,153,0.15)] transition-all duration-300 hover:from-[#EC4899]/30 hover:via-[#8B5CF6]/30 hover:to-[#EC4899]/30 hover:scale-[1.02] active:scale-[0.98]"

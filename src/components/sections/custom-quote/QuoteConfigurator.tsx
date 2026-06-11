@@ -195,7 +195,7 @@ Please send me a detailed proposal and consultation.
 
 Thank you.`;
 
-    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/917793922519?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };
 

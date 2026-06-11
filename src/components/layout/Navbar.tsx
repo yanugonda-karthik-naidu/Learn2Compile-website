@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { gsap } from "gsap";
 import { MobileMenu } from "./MobileMenu";
 import { motion } from "@/lib/gsap/config";
@@ -75,10 +76,8 @@ export function Navbar() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
           <div className={`flex h-14 sm:h-16 items-center justify-between transition-all duration-300 ${isScrolled ? "h-12 sm:h-14" : "h-14 sm:h-16"}`}>
             <Link href="/" className="flex items-center gap-2 group">
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] shadow-[0_0_20px_rgba(56,189,248,0.3)]">
-                <span className="text-sm font-bold text-white">L2C</span>
-              </div>
-              <span className="text-sm font-semibold tracking-tight text-white transition-opacity group-hover:opacity-80">Learn2Compile</span>
+              <Image src="/logo.png" alt="L2C Web Studio" width={44} height={44} className="h-10 sm:h-12 w-auto" />
+              <span className="text-sm font-semibold tracking-tight text-white transition-opacity group-hover:opacity-80">learn2compile</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-1">

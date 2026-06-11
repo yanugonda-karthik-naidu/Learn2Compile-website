@@ -3,10 +3,15 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { HeroSection } from "./hero/HeroSection";
 import { AboutMetricsSection } from "./about/AboutMetricsSection";
-import { ServicesSection } from "./services/ServicesSection";
-import { PortfolioSection } from "./portfolio/PortfolioSection";
-import { AboutWorkflowSection } from "./about/AboutWorkflowSection";
-import { PricingSection } from "./pricing/PricingSection";
+import { ServiceShowcase } from "./services/ServiceShowcase";
+import { WhyChooseUs } from "./services/WhyChooseUs";
+import { ServicesProcess } from "./services/ServicesProcess";
+import { ServicesTech } from "./services/ServicesTech";
+import { PortfolioExplorer } from "./portfolio/PortfolioExplorer";
+import { PortfolioCTASection } from "./portfolio/PortfolioCTASection";
+import { PricingCards } from "./pricing/PricingCards";
+import { PricingValue } from "./pricing/PricingValue";
+import { PricingFAQ } from "./pricing/PricingFAQ";
 import { TestimonialsSection } from "./testimonials/TestimonialsSection";
 import { FaqSection } from "./faq/FaqSection";
 import { ContactSection } from "./contact/ContactSection";
@@ -22,12 +27,17 @@ export function StudioFullLanding() {
       <MascotProvider />
       <HeroSection />
       <AboutMetricsSection />
-      <ServicesSection />
-      <PortfolioSection />
-      <AboutWorkflowSection />
-      <PricingSection />
+      <ServiceShowcase />
+      <WhyChooseUs />
+      <ServicesProcess />
+      <ServicesTech />
+      <PortfolioExplorer />
+      <PortfolioCTASection />
+      <PricingCards />
+      <PricingValue />
       <TestimonialsSection />
-      <FaqSection />
+      <PricingFAQ />
+      {/* <FaqSection /> */}
       <ContactSection />
       <FooterSection />
     </div>

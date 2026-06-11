@@ -1,18 +1,11 @@
-# TODO - ESTIMATOR LOCALIZATION & PRICING ALIGNMENT
+- [ ] Inspect current HeroSection.tsx structure and dependencies (done)
+- [ ] Propose an edit plan that matches the redesign requirements (pending confirmation)
+- [x] After approval, update HeroSection.tsx:
+  - [x] Remove background glows/orbs/extra layers and statistic cards
+  - [x] Implement new hero layout: studio badge, new headline, concise description, trust strip, CTA (2 buttons), industries pills row
+  - [x] Replace animations with minimal GSAP sequence per spec
+  - [x] Ensure mobile responsive typography and wrapping
+  - [x] Remove repeated banned words from hero copy
+- [x] Run typecheck/lint/build (or at least ts compile) to confirm no errors
 
-## Plan
-- Update `QuoteConfigurator` to use INR formatting (₹) and remove all hardcoded USD ($) strings.
-- Replace estimator base/add-on/pricing logic to match Pricing page tiers and add-ons.
-- Update delivery estimate ranges to: Starter 5–7, Business 7–14, Premium 14–21.
-- Add disclaimer below estimator in the Custom Quote page.
-- Ensure all numbers use Indian currency formatting (₹4,999 etc.).
-- Run typecheck/build to ensure no regressions.
-
-## Steps
-1. Implement INR currency formatting + remove `$` usage in `src/components/sections/custom-quote/QuoteConfigurator.tsx`.
-2. Align pricing constants/feature costs/pages additional pages/maintenance mapping + update total calculation.
-3. Update delivery estimate text and selected package logic to match required tiers.
-4. Add disclaimer under estimator (likely in `QuoteConfigurator` or `QuoteSummary`).
-5. Update/verify for any remaining USD strings in custom quote section files.
-6. Run `npm run lint` and `npm run build` (or project equivalent) to validate.
 

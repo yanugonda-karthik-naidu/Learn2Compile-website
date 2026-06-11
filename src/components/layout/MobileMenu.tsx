@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { gsap } from "gsap";
 import { motion } from "@/lib/gsap/config";
@@ -124,12 +125,7 @@ export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
             className="flex items-center gap-2 rounded-2xl px-2 py-2 outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60"
             ref={firstActionRef}
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] shadow-[0_0_20px_rgba(56,189,248,0.3)]">
-              <span className="text-sm font-bold text-white">L2C</span>
-            </div>
-            <span className="text-sm font-semibold tracking-tight text-white/95">
-              Learn2Compile
-            </span>
+            <Image src="/logo.png" alt="L2C Web Studio" width={44} height={44} className="h-10 w-auto" />
           </Link>
 
           <button
@@ -177,7 +173,7 @@ export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
           </Link>
 
           <a
-            href="https://wa.me/"
+            href="https://wa.me/917793922519"
             onClick={(e) => {
               // keep behavior consistent with existing menu; still close
               onClose();

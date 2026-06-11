@@ -26,11 +26,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://learn2compile.com"),
   title: {
-    default: "Learn2Compile | Premium Digital Studio India",
-    template: "%s | Learn2Compile",
+    default: "L2C Web Studio | Build For Growth",
+    template: "%s | L2C Web Studio",
   },
   description:
-    "Premium Indian digital studio crafting cinematic websites for startups, wedding planners, restaurants, and modern businesses.",
+    "Premium websites designed to build trust, attract customers, and drive business growth.",
   keywords: [
     "web development India",
     "premium UI design",
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
     "responsive web design",
     "digital studio India",
   ],
-  authors: [{ name: "Learn2Compile" }],
-  creator: "Learn2Compile",
-  publisher: "Learn2Compile",
+  authors: [{ name: "L2C Web Studio" }],
+  creator: "L2C Web Studio",
+  publisher: "L2C Web Studio",
   robots: {
     index: true,
     follow: true,
@@ -60,30 +60,30 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     url: "https://learn2compile.com",
-    siteName: "Learn2Compile",
-    title: "Learn2Compile | Premium Digital Studio India",
+    siteName: "L2C Web Studio",
+    title: "L2C Web Studio | Build For Growth",
     description:
-      "Premium Indian digital studio crafting cinematic websites for startups, wedding planners, restaurants, and modern businesses.",
+      "Premium websites designed to build trust, attract customers, and drive business growth.",
     images: [
       {
         url: "/og-default.png",
         width: 1200,
         height: 630,
-        alt: "Learn2Compile - Premium Digital Studio India",
+        alt: "L2C Web Studio - Premium Digital Studio",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Learn2Compile | Premium Digital Studio India",
+    title: "L2C Web Studio | Build For Growth",
     description:
-      "Premium Indian digital studio crafting cinematic websites for startups, wedding planners, restaurants, and modern businesses.",
+      "Premium websites designed to build trust, attract customers, and drive business growth.",
     site: "@learn2compile",
     creator: "@learn2compile",
     images: ["/og-default.png"],
   },
   appleWebApp: {
-    title: "Learn2Compile",
+    title: "L2C Web Studio",
     statusBarStyle: "black-translucent",
     startupImage: ["/og-default.png"],
   },
