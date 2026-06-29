@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://learn2compile.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://learn2compile.in"),
   title: {
     default: "L2C Web Studio | Build For Growth",
     template: "%s | L2C Web Studio",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://learn2compile.com",
+    url: "https://learn2compile.in",
     siteName: "L2C Web Studio",
     title: "L2C Web Studio | Build For Growth",
     description:

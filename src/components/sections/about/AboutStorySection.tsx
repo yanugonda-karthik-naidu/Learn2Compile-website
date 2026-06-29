@@ -54,7 +54,7 @@ const coreValues = [
 
 function MilestoneCard({
   milestone,
-  index,
+
 }: {
   milestone: (typeof milestones)[0];
   index: number;
@@ -236,14 +236,16 @@ export function AboutStorySection() {
 
           {/* Cards Container */}
           <div className="flex flex-col items-center gap-8">
-            {milestones.map((milestone, idx) => (
+            {milestones.map((milestone) => (
+
               <div key={milestone.badge} className="relative w-full">
                 {/* Timeline Dot */}
                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:block">
                   <div className="h-4 w-4 rounded-full bg-[#38BDF8] shadow-[0_0_20px_rgba(56,189,248,0.6)]" />
                 </div>
 
-                <MilestoneCard milestone={milestone} index={idx} />
+                <MilestoneCard milestone={milestone} index={0} />
+
               </div>
             ))}
           </div>

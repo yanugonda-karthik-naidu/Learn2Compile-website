@@ -7,7 +7,8 @@ import { FaqSection } from "./FaqSection";
 // import { getAllFaqItems } from "@/lib/seo/faqData";
 
 export function FaqPageContent() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery] = useState("");
+
   // const faqItems = getAllFaqItems();
 
   return (

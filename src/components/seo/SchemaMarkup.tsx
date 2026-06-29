@@ -40,8 +40,8 @@ export function OrganizationSchemaMarkup() {
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "Learn2Compile",
-          url: "https://learn2compile.com",
-          logo: "https://learn2compile.com/logo.png",
+          url: "https://learn2compile.in",
+          logo: "https://learn2compile.in/logo.png",
           description:
             "Premium Indian digital studio crafting cinematic websites for startups, wedding planners, restaurants, and modern businesses.",
           email: "hello@learn2compile.com",
@@ -78,19 +78,19 @@ export function WebSiteSchemaMarkup() {
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Learn2Compile",
-          url: "https://learn2compile.com",
+          url: "https://learn2compile.in",
           description:
             "Premium Indian digital studio crafting cinematic websites for modern businesses.",
           publisher: {
             "@type": "Organization",
             name: "Learn2Compile",
-            url: "https://learn2compile.com",
+            url: "https://learn2compile.in",
           },
           potentialAction: {
             "@type": "SearchAction",
             target: {
               "@type": "EntryPoint",
-              urlTemplate: "https://learn2compile.com/?q={search_term_string}",
+              urlTemplate: "https://learn2compile.in/?q={search_term_string}",
             },
             "query-input": "required name=search_term_string",
           },
@@ -112,8 +112,8 @@ export function LocalBusinessSchemaMarkup() {
           "@context": "https://schema.org",
           "@type": "ProfessionalService",
           name: "Learn2Compile",
-          image: "https://learn2compile.com/og-default.png",
-          url: "https://learn2compile.com",
+          image: "https://learn2compile.in/og-default.png",
+          url: "https://learn2compile.in",
           telephone: "+91-9876543210",
           email: "hello@learn2compile.com",
           address: {

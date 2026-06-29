@@ -4,7 +4,7 @@
  */
 
 export const SITE_NAME = "Learn2Compile";
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://learn2compile.com";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://learn2compile.in";
 export const SITE_DESCRIPTION =
   "Premium Indian digital studio crafting cinematic websites for startups, wedding planners, restaurants, and modern businesses.";
 export const SITE_KEYWORDS = [

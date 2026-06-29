@@ -1,11 +1,11 @@
-- [ ] Inspect current HeroSection.tsx structure and dependencies (done)
-- [ ] Propose an edit plan that matches the redesign requirements (pending confirmation)
-- [x] After approval, update HeroSection.tsx:
-  - [x] Remove background glows/orbs/extra layers and statistic cards
-  - [x] Implement new hero layout: studio badge, new headline, concise description, trust strip, CTA (2 buttons), industries pills row
-  - [x] Replace animations with minimal GSAP sequence per spec
-  - [x] Ensure mobile responsive typography and wrapping
-  - [x] Remove repeated banned words from hero copy
-- [x] Run typecheck/lint/build (or at least ts compile) to confirm no errors
+# TODO - Fix build ESLint errors
 
+## Plan approved scope
+- Fix Next.js build failures by resolving ESLint errors and warnings in listed files.
+
+## Steps
+1. Remove unused imports/variables flagged by ESLint (no-unused-vars) across the provided files.
+2. Fix `react/no-unescaped-entities` error in `PortfolioHeroSection.tsx` by escaping apostrophes.
+3. Re-run `npm run build` to confirm compilation passes.
+4. Re-run lint/build if any additional ESLint issues appear.
 

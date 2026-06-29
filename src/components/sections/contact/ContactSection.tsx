@@ -161,7 +161,7 @@ export function ContactSection() {
     register,
     handleSubmit,
     setValue,
-    watch,
+
     formState: { errors },
     reset,
   } = useForm<ContactInquiryInput>({

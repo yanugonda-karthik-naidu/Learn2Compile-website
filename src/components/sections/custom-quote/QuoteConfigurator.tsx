@@ -159,7 +159,7 @@ export function QuoteConfigurator() {
     return generateRange(calculated - variance, calculated + variance);
   }, [selectedType, selectedPages, selectedFeatures, selectedDesign, selectedTimeline]);
 
-  const selectedTypeData = websiteTypes.find((t) => t.type === selectedType)!;
+
 
   const togglePage = (page: PageKey) => {
     setSelectedPages((prev) =>

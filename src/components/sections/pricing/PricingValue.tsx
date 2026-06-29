@@ -124,7 +124,7 @@ function AnimatedCounter({
   );
 }
 
-function ValueCard({ prop, index }: { prop: ValueProp; index: number }) {
+function ValueCard({ prop }: { prop: ValueProp }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -342,8 +342,8 @@ export function PricingValue() {
 
         {/* Value props grid */}
         <div className="mt-20 grid gap-8 md:grid-cols-2 lg:grid-cols-3" data-animate="stagger">
-          {valueProps.map((prop, index) => (
-            <ValueCard key={prop.title} prop={prop} index={index} />
+{valueProps.map((prop) => (
+            <ValueCard key={prop.title} prop={prop} />
           ))}
         </div>
 

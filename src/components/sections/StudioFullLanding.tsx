@@ -13,7 +13,7 @@ import { PricingCards } from "./pricing/PricingCards";
 import { PricingValue } from "./pricing/PricingValue";
 import { PricingFAQ } from "./pricing/PricingFAQ";
 import { TestimonialsSection } from "./testimonials/TestimonialsSection";
-import { FaqSection } from "./faq/FaqSection";
+
 import { ContactSection } from "./contact/ContactSection";
 import { FooterSection } from "./footer/FooterSection";
 import { CustomCursor } from "./cursor/CustomCursor";

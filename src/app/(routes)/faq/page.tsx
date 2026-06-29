@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { CustomCursor } from "@/components/sections/cursor/CustomCursor";
 import { FaqPageContent } from "@/components/sections/faq/FaqPageContent";
-import { TrustSection } from "@/components/sections/trust/TrustSection";
+
 import { ContactSection } from "@/components/sections/contact/ContactSection";
 import { FooterSection } from "@/components/sections/footer/FooterSection";
 import { PageTransitionProvider } from "@/components/scroll/PageTransitionProvider";

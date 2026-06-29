@@ -19,22 +19,6 @@ const CheckIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const ArrowRightIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M5 12h14" />
-    <path d="m12 5 7 7-7 7" />
-  </svg>
-);
-
 function TrustPill({ label }: { label: string }) {
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">
@@ -80,9 +64,7 @@ function ConsultationCard() {
           <div className="text-xs uppercase tracking-[0.18em] text-white/50">
             Response Time
           </div>
-          <div className="mt-2 text-sm font-semibold text-white">
-            Within 24 Hours
-          </div>
+          <div className="mt-2 text-sm font-semibold text-white">Within 24 Hours</div>
         </div>
 
         <div className="mt-6 h-px bg-white/10" />
@@ -92,14 +74,12 @@ function ConsultationCard() {
             Planning Includes
           </div>
           <div className="mt-3 space-y-2">
-            {["Business Analysis", "Feature Mapping", "Execution Strategy"].map(
-              (item) => (
-                <div key={item} className="flex items-center gap-3">
-                  <span className="inline-flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#8B5CF6]" />
-                  <span className="text-sm text-white/70">{item}</span>
-                </div>
-              )
-            )}
+            {["Business Analysis", "Feature Mapping", "Execution Strategy"].map((item) => (
+              <div key={item} className="flex items-center gap-3">
+                <span className="inline-flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#8B5CF6]" />
+                <span className="text-sm text-white/70">{item}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -130,7 +110,11 @@ export function QuoteHero() {
   const cardRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
 
+  // Keep refs consistent with markup (benefitsRef is currently unused for animations)
+  void benefitsRef;
+
   useEffect(() => {
+
     if (reduced) return;
 
     const ctx = gsap.context(() => {
@@ -214,10 +198,7 @@ export function QuoteHero() {
   ];
 
   return (
-    <section
-      ref={heroRef}
-      className="relative min-h-screen overflow-hidden bg-[#050816]"
-    >
+    <section ref={heroRef} className="relative min-h-screen overflow-hidden bg-[#050816]">
       {/* Background gradients */}
       <div className="absolute inset-0 z-0">
         <div className="absolute left-1/4 top-0 h-[400px] w-[400px] rounded-full bg-[#38BDF8]/10 blur-[120px]" />
@@ -236,11 +217,9 @@ export function QuoteHero() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Two-column: 55% left / 45% right */}
         <div className="flex min-h-screen items-center py-16 sm:py-20 lg:py-24">
-          {/* LEFT SIDE - 55% */}
+          {/* LEFT SIDE */}
           <div className="w-full lg:w-[55%] pr-0 lg:pr-12">
-            {/* Badge */}
             <div
               ref={eyebrowRef}
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/80 opacity-0"
@@ -252,7 +231,6 @@ export function QuoteHero() {
               Premium Consultation Studio
             </div>
 
-            {/* Headline */}
             <h1
               ref={titleRef}
               className="mt-6 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold leading-[1.1] tracking-tight opacity-0"
@@ -264,28 +242,21 @@ export function QuoteHero() {
               </span>
             </h1>
 
-            {/* Description */}
             <p
               ref={subtitleRef}
               className="mt-6 max-w-xl text-base leading-7 text-white/70 sm:text-lg opacity-0"
             >
               Tell us about your business, requirements, and goals.
               <br />
-              Receive a tailored website strategy, estimated budget, feature
-              roadmap, and project timeline.
+              Receive a tailored website strategy, estimated budget, feature roadmap, and project timeline.
             </p>
 
-            {/* CTAs */}
-            <div
-              ref={ctaRef}
-              className="mt-8 flex flex-wrap gap-4 opacity-0"
-            >
+            <div ref={ctaRef} className="mt-8 flex flex-wrap gap-4 opacity-0">
               <a
                 href="#quote-form"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#38BDF8] via-[#8B5CF6] to-[#06B6D4] px-7 py-4 text-sm font-semibold text-white shadow-[0_0_28px_rgba(56,189,248,0.25)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(56,189,248,0.35)] active:scale-[0.98]"
               >
                 Get Free Consultation
-                {/* <ArrowRightIcon className="h-4 w-4 transition-transform group-hover:translate-x-1" /> */}
               </a>
               <a
                 href="/pricing"
@@ -295,7 +266,6 @@ export function QuoteHero() {
               </a>
             </div>
 
-            {/* Trust Pills */}
             <div ref={pillsRef} className="mt-8 flex flex-wrap gap-3">
               <TrustPill label="Free Consultation" />
               <TrustPill label="Transparent Pricing" />
@@ -304,7 +274,7 @@ export function QuoteHero() {
             </div>
           </div>
 
-          {/* RIGHT SIDE - 45% */}
+          {/* RIGHT SIDE */}
           <div className="hidden lg:flex lg:w-[45%] items-center justify-center">
             <div ref={cardRef} className="w-full max-w-[420px] opacity-0">
               <ConsultationCard />
@@ -314,10 +284,7 @@ export function QuoteHero() {
 
         {/* BOTTOM BENEFITS */}
         <div className="pb-16 sm:pb-20 lg:pb-24">
-          <div
-            ref={benefitsRef}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-          >
+          <div ref={benefitsRef} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {benefits.map((title) => (
               <BenefitCard key={title} title={title} />
             ))}
@@ -327,3 +294,4 @@ export function QuoteHero() {
     </section>
   );
 }
+

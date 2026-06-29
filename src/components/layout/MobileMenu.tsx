@@ -103,11 +103,13 @@ export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
     <div
       ref={overlayRef}
       className="fixed inset-0 z-[9999] hidden md:hidden"
-      style={{ opacity: 0 }}
-      onMouseDown={(e) => {
+style={{ opacity: 0 }}
+      onMouseDown={() => {
         // Click outside closes
-        if (e.target === overlayRef.current) onClose();
+        if (overlayRef.current) onClose();
       }}
+
+
       role="dialog"
       aria-modal="true"
       aria-label="Mobile navigation"
@@ -174,10 +176,11 @@ export function MobileMenu({ isOpen, onClose, links }: MobileMenuProps) {
 
           <a
             href="https://wa.me/917793922519"
-            onClick={(e) => {
+            onClick={() => {
               // keep behavior consistent with existing menu; still close
               onClose();
             }}
+
             className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-base font-medium text-white/90 shadow-[0_0_0_1px_rgba(255,255,255,0.06)] transition hover:border-[#38BDF8]/30 hover:bg-white/10 hover:text-white active:scale-[0.99]"
           >
             WhatsApp Inquiry

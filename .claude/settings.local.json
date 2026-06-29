@@ -6,7 +6,8 @@
       "Bash(npm run lint)",
       "Bash(npm run lint --silent)",
       "Bash(npx tsc --noEmit src/components/sections/custom-quote/QuoteSteps.tsx)",
-      "Bash(npx tsc --noEmit --jsx preserve src/components/sections/custom-quote/QuoteConfigurator.tsx)"
+      "Bash(npx tsc --noEmit --jsx preserve src/components/sections/custom-quote/QuoteConfigurator.tsx)",
+      "Bash(npx tsc --noEmit --skipLibCheck)"
     ]
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import { gsap } from "gsap";
 import { useMotion } from "@/hooks/useMotion";
 
@@ -112,7 +113,8 @@ export function AboutCTASection() {
     );
   }, [reduced]);
 
-  const whatsappNumber =process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "917793922519";
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "917793922519";
+
   const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hi Learn2Compile, I would like to discuss a website project."
   )}`;
